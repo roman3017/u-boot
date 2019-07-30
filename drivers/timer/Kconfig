@@ -117,6 +117,12 @@ config RENESAS_OSTM_TIMER
 	  Enables support for the Renesas OSTM Timer driver.
 	  This timer is present on Renesas RZ/A1 R7S72100 SoCs.
 
+config VEXRISCV_TIMER
+	bool "Vexriscv Timer"
+	depends on TIMER
+	help
+	  Enables support for the Vexriscv Timer driver.
+
 config X86_TSC_TIMER_EARLY_FREQ
 	int "x86 TSC timer frequency in MHz when used as the early timer"
 	depends on X86_TSC_TIMER

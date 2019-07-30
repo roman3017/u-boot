@@ -27,6 +27,8 @@ obj-y   += setjmp.o
 obj-$(CONFIG_$(SPL_)SMP) += smp.o
 obj-$(CONFIG_SPL_BUILD)	+= spl.o
 obj-y   += fdt_fixup.o
+obj-y += ashldi3.o
+obj-y += lshrdi3.o
 
 # For building EFI apps
 CFLAGS_$(EFI_CRT0) := $(CFLAGS_EFI)
