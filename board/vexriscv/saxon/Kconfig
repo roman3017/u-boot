@@ -1,0 +1,23 @@
+if TARGET_VEXRISCV_SAXON
+
+config SYS_BOARD
+	default "saxon"
+
+config SYS_VENDOR
+	default "vexriscv"
+
+config SYS_CPU
+	default "generic"
+
+config SYS_CONFIG_NAME
+	default "saxon"
+
+config SYS_TEXT_BASE
+	default 0x80000000
+
+config BOARD_SPECIFIC_OPTIONS # dummy
+	def_bool y
+	select GENERIC_RISCV
+	imply VEXRISCV_SERIAL
+
+endif

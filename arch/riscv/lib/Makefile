@@ -19,6 +19,8 @@ obj-y	+= reset.o
 obj-$(CONFIG_SBI_IPI) += sbi_ipi.o
 obj-y   += setjmp.o
 obj-$(CONFIG_SMP) += smp.o
+obj-y += ashldi3.o
+obj-y += lshrdi3.o
 
 # For building EFI apps
 CFLAGS_$(EFI_CRT0) := $(CFLAGS_EFI)
