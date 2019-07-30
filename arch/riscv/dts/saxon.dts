@@ -1,0 +1,120 @@
+/dts-v1/;
+
+/ {
+  #address-cells = <1>;
+  #size-cells = <1>;
+  compatible = "spinal,vexriscv";
+  model = "spinal,vexriscv_saxon";
+
+  aliases {
+    uart0 = &serial0;
+  };
+
+  chosen {
+    bootargs = "console=ttyS0,115200n8 debug loglevel=7";
+    stdout-path = "uart0:115200n8";
+  };
+
+  cpus {
+    #address-cells = <1>;
+    #size-cells = <0>;
+    timebase-frequency = <50000000>;
+    cpu@0 {
+      device_type = "cpu";
+      compatible = "riscv";
+      riscv,isa = "rv32im";
+      mmu-type = "riscv,sv32";
+      clock-frequency = <50000000>;
+      reg = <0>;
+      i-cache-size = <0x1000>;
+      i-cache-line-size = <32>;
+      d-cache-size = <0x1000>;
+      d-cache-line-size = <32>;
+      intc0: interrupt-controller {
+          #interrupt-cells = <1>;
+          interrupt-controller;
+          compatible = "riscv,cpu-intc";
+      };
+    };
+  };
+
+  memory {
+      device_type = "memory";
+      reg = <0x80000000 0x02000000>;
+  };
+
+  soc {
+    #address-cells = <1>;
+    #size-cells = <1>;
+    compatible = "simple-bus";
+    ranges;
+    clock-frequency = <50000000>;
+
+    plic0: interrupt-controller@c00000 {
+        compatible = "riscv,plic0";
+			  #address-cells = <1>;
+        #interrupt-cells = <1>;
+        interrupt-controller;
+        interrupts-extended = <&intc0 11 &intc0 9>;
+        reg = <0x00c00000 0x00400000>;
+        riscv,ndev = <32>;
+    };
+
+    timer0: timer@10008000 {
+      compatible = "vexriscv,timer0";
+      reg = <0x10008000 0x10>;
+      clock-frequency = <50000000>;
+		  interrupts = <0>;
+		  interrupt-parent = <&plic0>;
+    };
+
+    serial0: serial@10010000 {
+      device_type = "serial";
+      compatible = "vexriscv,uart0";
+      reg = <0x10010000 0x10>;
+      clock-frequency = <50000000>;
+      interrupts = <1>;
+      interrupt-parent = <&plic0>;
+    };
+/*
+    gpio0: gpio@0 {
+      compatible = "spinal-lib,gpio-1.0";
+      interrupt-parent = <&plic0>;
+      ngpio = <24>;
+      interrupts = <4 5 6 7>;
+      reg = <0x000000 0x1000>;
+      gpio-controller;
+      #gpio-cells = <2>;
+      interrupt-controller;
+      #interrupt-cells = <2>;
+    };
+
+    spi0: spi@20000 {
+        compatible = "spinal-lib,spi-1.0";
+        #address-cells = <1>;
+        #size-cells = <0>;
+        reg = <0x020000 0x1000>;
+        cmd_fifo_depth = <256>;
+        rsp_fifo_depth = <256>;
+        cs-gpios = <&gpio0 8 0>;
+
+        mmc-slot@0 {
+            compatible = "mmc-spi-slot";
+            reg = <0>;
+            voltage-ranges = <3300 3300>;
+            spi-max-frequency = <25000000>;
+        };
+    };
+
+    spi1: spi@21000 {
+        compatible = "spinal-lib,spi-1.0";
+        #address-cells = <1>;
+        #size-cells = <0>;
+        reg = <0x021000 0x1000>;
+        cmd_fifo_depth = <256>;
+        rsp_fifo_depth = <256>;
+        cs-gpios = <&gpio0 4 0>, <&gpio0 5 0>, <&gpio0 6 0>, <&gpio0 7 0>;
+    };
+*/
+  };
+};
