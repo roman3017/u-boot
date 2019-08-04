@@ -15,8 +15,6 @@
 #define CONFIG_SYS_MALLOC_LEN		SZ_8K
 #define CONFIG_ENV_SIZE			SZ_4K
 #define	CONFIG_EXTRA_ENV_SETTINGS	"initrd_high=0xffffffff\0" \
-                                  "fdt_high=0xffffffff\0" 
-#define CONFIG_BOOTCOMMAND	"bootm 0x803fffc0 0x807fffc0 0x80ff0000"
-//#define CONFIG_BOOTCOMMAND	"booti 0x80400000 0x807fffc0 0x80ff0000"
+                                  "fdt_high=0xffffffff\0"
 
 #endif /* __CONFIG_H */
