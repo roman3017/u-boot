@@ -19,6 +19,7 @@ obj-y	+= reset.o
 obj-$(CONFIG_SBI_IPI) += sbi_ipi.o
 obj-y   += setjmp.o
 obj-$(CONFIG_SMP) += smp.o
+obj-$(CONFIG_SPL_BUILD)	+= spl.o
 obj-y += ashldi3.o
 obj-y += lshrdi3.o
 
