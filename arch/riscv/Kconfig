@@ -22,6 +22,7 @@ config TARGET_SIFIVE_FU540
 
 config TARGET_VEXRISCV_SAXON
 	bool "Support Saxon Board"
+	select SUPPORT_SPL
 
 endchoice
 
