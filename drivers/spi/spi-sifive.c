@@ -5,7 +5,7 @@
  *
  * SiFive SPI controller driver (master mode only)
  */
-
+#define DEBUG
 #include <common.h>
 #include <dm.h>
 #include <malloc.h>

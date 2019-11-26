@@ -73,6 +73,7 @@ obj-$(CONFIG_$(SPL_TPL_)OF_CONTROL) += fdtdec.o
 endif
 
 ifdef CONFIG_SPL_BUILD
+obj-$(CONFIG_MMC_SPI) += crc7.o
 obj-$(CONFIG_SPL_YMODEM_SUPPORT) += crc16.o
 obj-$(CONFIG_$(SPL_TPL_)HASH_SUPPORT) += crc16.o
 obj-$(CONFIG_SPL_NET_SUPPORT) += net_utils.o

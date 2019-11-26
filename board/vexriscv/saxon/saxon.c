@@ -3,7 +3,7 @@
  * Copyright (C) 2019 roman3017 <rbacik@hotmail.com>
  *
  */
-
+#define DEBUG
 #include <common.h>
 #include <cpu.h>
 #include <dm.h>
@@ -60,6 +60,11 @@ void __noreturn jump_to_image_linux(struct spl_image_info *spl_image)
 
 /* DO NOT enable SPL_OF_LIBFDT without SPL_OF_CONTROL */
 #if !defined(CONFIG_SPL_OF_LIBFDT)
+s32 fdtdec_get_int(const void *blob, int node, const char *prop_name, s32 default_val)
+{
+	debug("!!!%s\n",__func__);
+	return -1;
+}
 int dm_scan_fdt_dev(struct udevice *dev)
 {
 	debug("!!!%s\n",__func__);
@@ -106,6 +111,14 @@ static const struct cpu_platdata riscv_cpu_info = {
 U_BOOT_DEVICE(riscv_cpu_non_fdt) = {
   .name = "riscv_cpu",
 	.platdata = &riscv_cpu_info,
+};
+
+U_BOOT_DEVICE(sifive_spi) = {
+	.name	= "sifive_spi",
+};
+
+U_BOOT_DEVICE(mmc_spi) = {
+	.name = "mmc_spi",
 };
 #endif /* !CONFIG_SPL_OF_LIBFDT && !CONFIG_SPL_OF_CONTROL */
 #endif /* CONFIG_SPL_BUILD */

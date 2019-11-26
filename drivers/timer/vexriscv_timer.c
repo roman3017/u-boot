@@ -2,7 +2,7 @@
 /*
  * Copyright (C) 2019 roman3017 <rbacik@hotmail.com>
  */
-
+#define DEBUG
 #include <common.h>
 #include <asm/io.h>
 #include <dm.h>
@@ -59,6 +59,7 @@ static int vexriscv_probe(struct udevice *dev)
 	struct vexriscv_platdata *platdata;
 	struct timer_dev_priv *uc_priv;
 
+	debug("!!!%s:%d\n",__func__,__LINE__);
 	platdata = dev_get_platdata(dev);
   writel(0xFFFFFFFF, (void *)(platdata->regs + 0xC));
   writel(0xFFFFFFFF, (void *)(platdata->regs + 0x8));
@@ -75,7 +76,7 @@ static const struct timer_ops vexriscv_ops = {
 
 #if CONFIG_IS_ENABLED(OF_CONTROL) && !CONFIG_IS_ENABLED(OF_PLATDATA)
 static const struct udevice_id vexriscv_of_match[] = {
-	{ .compatible = "vexriscv,timer0" },
+	{ .compatible = "vexriscv,timer" },
 	{}
 };
 #endif

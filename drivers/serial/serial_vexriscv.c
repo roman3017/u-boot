@@ -2,7 +2,7 @@
 /*
  * Copyright (C) 2019 roman3017 <rbacik@hotmail.com>
  */
-
+#define DEBUG
 #include <common.h>
 #include <clk.h>
 #include <debug_uart.h>
@@ -168,6 +168,7 @@ static int vexriscv_ofdata_to_platdata(struct udevice *dev)
 static int vexriscv_probe(struct udevice *dev)
 {
   UNUSED(dev);
+	debug("!!!%s\n",__func__);
 	return 0;
 }
 
@@ -184,7 +185,7 @@ static const struct dm_serial_ops vexriscv_ops = {
 
 #if CONFIG_IS_ENABLED(OF_CONTROL) && !CONFIG_IS_ENABLED(OF_PLATDATA)
 static const struct udevice_id vexriscv_of_match[] = {
-	{ .compatible = "vexriscv,uart0" },
+	{ .compatible = "vexriscv,uart" },
 	{ }
 };
 #endif /* OF_CONTROL && !OF_PLATDATA */

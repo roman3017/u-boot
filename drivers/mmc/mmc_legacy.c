@@ -3,7 +3,7 @@
  * Copyright (C) 2016 Google, Inc
  * Written by Simon Glass <sjg@chromium.org>
  */
-
+#define DEBUG
 #include <common.h>
 #include <malloc.h>
 #include <mmc.h>
@@ -39,6 +39,7 @@ struct mmc *find_mmc_device(int dev_num)
 	struct mmc *m;
 	struct list_head *entry;
 
+	debug("!!!%s:%d\n",__func__,__LINE__);
 	list_for_each(entry, &mmc_devices) {
 		m = list_entry(entry, struct mmc, link);
 
@@ -73,6 +74,7 @@ void mmc_do_preinit(void)
 	struct mmc *m;
 	struct list_head *entry;
 
+	debug("!!!%s:%d\n",__func__,__LINE__);
 	list_for_each(entry, &mmc_devices) {
 		m = list_entry(entry, struct mmc, link);
 
@@ -87,12 +89,14 @@ void mmc_do_preinit(void)
 
 void mmc_list_init(void)
 {
+	debug("!!!%s:%d\n",__func__,__LINE__);
 	INIT_LIST_HEAD(&mmc_devices);
 	cur_dev_num = 0;
 }
 
 void mmc_list_add(struct mmc *mmc)
 {
+	debug("!!!%s:%d\n",__func__,__LINE__);
 	INIT_LIST_HEAD(&mmc->link);
 
 	list_add_tail(&mmc->link, &mmc_devices);
@@ -150,6 +154,7 @@ struct mmc *mmc_create(const struct mmc_config *cfg, void *priv)
 {
 	struct mmc *mmc = &mmc_static;
 
+	debug("!!!%s:%d\n",__func__,__LINE__);
 	/* First MMC device registered, fail to register a new one.
 	 * Given users are not expecting this to fail, instead
 	 * of failing let's just return the only MMC device
@@ -174,6 +179,7 @@ struct mmc *mmc_create(const struct mmc_config *cfg, void *priv)
 	struct blk_desc *bdesc;
 	struct mmc *mmc;
 
+	debug("!!!%s:%d\n",__func__,__LINE__);
 	/* quick validation */
 	if (cfg == NULL || cfg->f_min == 0 ||
 	    cfg->f_max == 0 || cfg->b_max == 0)

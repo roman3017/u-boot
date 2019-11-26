@@ -5,7 +5,7 @@
  *
  * Author: Boris Brezillon <boris.brezillon@bootlin.com>
  */
-
+#define DEBUG
 #ifndef __UBOOT__
 #include <linux/dmaengine.h>
 #include <linux/pm_runtime.h>

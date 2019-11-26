@@ -6,6 +6,7 @@
  *
  * Licensed under the GPL-2 or later.
  */
+#define DEBUG
 #include <common.h>
 #include <errno.h>
 #include <malloc.h>
@@ -373,6 +374,7 @@ static int mmc_spi_probe(struct udevice *dev)
 	struct mmc_uclass_priv *upriv = dev_get_uclass_priv(dev);
 	char *name;
 
+	debug("!!!%s\n",__func__);
 	priv->spi = dev_get_parent_priv(dev);
 	if (!priv->spi->max_hz)
 		priv->spi->max_hz = MMC_SPI_MAX_CLOCK;
@@ -428,3 +430,11 @@ U_BOOT_DRIVER(mmc_spi) = {
 	.bind = mmc_spi_bind,
 	.priv_auto_alloc_size = sizeof(struct mmc_spi_priv),
 };
+/*
+UCLASS_DRIVER(mmc_spi) = {
+	.id		= UCLASS_MMC,
+	.name		= "mmc_spi",
+	.flags		= DM_UC_FLAG_SEQ_ALIAS,
+	.per_device_auto_alloc_size = sizeof(struct mmc_uclass_priv),
+};
+*/

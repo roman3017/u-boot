@@ -5,7 +5,7 @@
  *
  * Based vaguely on the Linux code
  */
-
+#define DEBUG
 #include <config.h>
 #include <common.h>
 #include <command.h>
@@ -1550,6 +1550,7 @@ static int mmc_set_ios(struct mmc *mmc)
 
 int mmc_set_clock(struct mmc *mmc, uint clock, bool disable)
 {
+	debug("!!!%s:%d\n",__func__,__LINE__);
 	if (!disable) {
 		if (clock > mmc->cfg->f_max)
 			clock = mmc->cfg->f_max;
@@ -2166,6 +2167,7 @@ static int mmc_startup_v4(struct mmc *mmc)
 		MMC_VERSION_5_1
 	};
 
+	debug("!!!%s:%d\n",__func__,__LINE__);
 #if CONFIG_IS_ENABLED(MMC_TINY)
 	u8 *ext_csd = ext_csd_bkup;
 
@@ -2362,6 +2364,7 @@ static int mmc_startup(struct mmc *mmc)
 	struct mmc_cmd cmd;
 	struct blk_desc *bdesc;
 
+	debug("!!!%s:%d\n",__func__,__LINE__);
 #ifdef CONFIG_MMC_SPI_CRC_ON
 	if (mmc_host_is_spi(mmc)) { /* enable CRC check for spi */
 		cmd.cmdidx = MMC_CMD_SPI_CRC_ON_OFF;
@@ -2605,6 +2608,7 @@ static int mmc_send_if_cond(struct mmc *mmc)
 	struct mmc_cmd cmd;
 	int err;
 
+	debug("!!!%s:%d\n",__func__,__LINE__);
 	cmd.cmdidx = SD_CMD_SEND_IF_COND;
 	/* We set the bit if the host supports voltages between 2.7 and 3.6 V */
 	cmd.cmdarg = ((mmc->cfg->voltages & 0xff8000) != 0) << 8 | 0xaa;
@@ -2636,6 +2640,7 @@ static int mmc_power_init(struct mmc *mmc)
 #if CONFIG_IS_ENABLED(DM_REGULATOR)
 	int ret;
 
+	debug("!!!%s:%d\n",__func__,__LINE__);
 	ret = device_get_supply_regulator(mmc->dev, "vmmc-supply",
 					  &mmc->vmmc_supply);
 	if (ret)
@@ -2665,6 +2670,7 @@ static void mmc_set_initial_state(struct mmc *mmc)
 {
 	int err;
 
+	debug("!!!%s:%d\n",__func__,__LINE__);
 	/* First try to set 3.3V. If it fails set to 1.8V */
 	err = mmc_set_signal_voltage(mmc, MMC_SIGNAL_VOLTAGE_330);
 	if (err != 0)
@@ -2712,6 +2718,7 @@ static int mmc_power_cycle(struct mmc *mmc)
 {
 	int ret;
 
+	debug("!!!%s:%d\n",__func__,__LINE__);
 	ret = mmc_power_off(mmc);
 	if (ret)
 		return ret;
@@ -2728,6 +2735,7 @@ int mmc_get_op_cond(struct mmc *mmc)
 	bool uhs_en = supports_uhs(mmc->cfg->host_caps);
 	int err;
 
+	debug("!!!%s:%d\n",__func__,__LINE__);
 	if (mmc->has_init)
 		return 0;
 
@@ -2811,6 +2819,7 @@ int mmc_start_init(struct mmc *mmc)
 	bool no_card;
 	int err = 0;
 
+	debug("!!!%s:%d\n",__func__,__LINE__);
 	/*
 	 * all hosts are capable of 1 bit bus-width and able to use the legacy
 	 * timings.
@@ -2847,6 +2856,7 @@ static int mmc_complete_init(struct mmc *mmc)
 {
 	int err = 0;
 
+	debug("!!!%s:%d\n",__func__,__LINE__);
 	mmc->init_in_progress = 0;
 	if (mmc->op_cond_pending)
 		err = mmc_complete_op_cond(mmc);
@@ -2864,6 +2874,7 @@ int mmc_init(struct mmc *mmc)
 {
 	int err = 0;
 	__maybe_unused ulong start;
+	debug("!!!%s:%d\n",__func__,__LINE__);
 #if CONFIG_IS_ENABLED(DM_MMC)
 	struct mmc_uclass_priv *upriv = dev_get_uclass_priv(mmc->dev);
 
@@ -2941,6 +2952,7 @@ static int mmc_probe(bd_t *bis)
 	struct uclass *uc;
 	struct udevice *dev;
 
+	debug("!!!%s:%d\n",__func__,__LINE__);
 	ret = uclass_get(UCLASS_MMC, &uc);
 	if (ret)
 		return ret;
@@ -2966,6 +2978,7 @@ static int mmc_probe(bd_t *bis)
 #else
 static int mmc_probe(bd_t *bis)
 {
+	debug("!!!%s\n",__func__);
 	if (board_mmc_init(bis) < 0)
 		cpu_mmc_init(bis);
 
@@ -2977,6 +2990,7 @@ int mmc_initialize(bd_t *bis)
 {
 	static int initialized = 0;
 	int ret;
+	debug("!!!%s:%d\n",__func__,__LINE__);
 	if (initialized)	/* Avoid initializing mmc multiple times */
 		return 0;
 	initialized = 1;

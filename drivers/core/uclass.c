@@ -5,7 +5,7 @@
  * (C) Copyright 2012
  * Pavel Herrmann <morpheus.ibis@gmail.com>
  */
-
+#define DEBUG
 #include <common.h>
 #include <dm.h>
 #include <errno.h>
