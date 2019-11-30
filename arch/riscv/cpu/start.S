@@ -192,6 +192,7 @@ spl_stack_gd_setup:
 	mv	sp, s0
 #endif
 
+#ifdef CONFIG_SMP
 	/* set new stack and global data pointer on secondary harts */
 spl_secondary_hart_stack_gd_setup:
 	la	a0, secondary_hart_relocate
@@ -205,6 +206,7 @@ spl_secondary_hart_stack_gd_setup:
 	la	a0, secondary_harts_relocation_error
 	jal	printf
 	jal	hang
+#endif
 
 	/* set new global data pointer on main hart */
 1:	mv	gp, s0
