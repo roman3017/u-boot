@@ -14,15 +14,19 @@ DECLARE_GLOBAL_DATA_PTR;
 
 static int riscv_cpu_get_desc(struct udevice *dev, char *buf, int size)
 {
+#if CONFIG_IS_ENABLED(OF_CONTROL) && !CONFIG_IS_ENABLED(OF_PLATDATA)
 	const char *isa;
 
 	isa = dev_read_string(dev, "riscv,isa");
-	if (size < (strlen(isa) + 1))
+	if (!isa || size < (strlen(isa) + 1))
 		return -ENOSPC;
 
 	strcpy(buf, isa);
 
 	return 0;
+#else
+	return -ENOSPC;
+#endif
 }
 
 static int riscv_cpu_get_info(struct udevice *dev, struct cpu_info *info)
@@ -46,9 +50,11 @@ static int riscv_cpu_get_count(struct udevice *dev)
 	ofnode_for_each_subnode(node, dev_ofnode(dev->parent)) {
 		const char *device_type;
 
+#if CONFIG_IS_ENABLED(OF_CONTROL) && !CONFIG_IS_ENABLED(OF_PLATDATA)
 		/* skip if hart is marked as not available in the device tree */
 		if (!ofnode_is_available(node))
 			continue;
+#endif
 
 		device_type = ofnode_read_string(node, "device_type");
 		if (!device_type)
@@ -62,9 +68,12 @@ static int riscv_cpu_get_count(struct udevice *dev)
 
 static int riscv_cpu_bind(struct udevice *dev)
 {
-	struct cpu_platdata *plat = dev_get_parent_platdata(dev);
+	struct cpu_platdata *plat;
 	struct driver *drv;
+#if CONFIG_IS_ENABLED(OF_CONTROL) && !CONFIG_IS_ENABLED(OF_PLATDATA)
 	int ret;
+
+	plat = dev_get_parent_platdata(dev);
 
 	/* save the hart id */
 	plat->cpu_id = dev_read_addr(dev);
@@ -74,6 +83,9 @@ static int riscv_cpu_bind(struct udevice *dev)
 	if (ret)
 		dev_read_u32(dev->parent, "timebase-frequency",
 			     &plat->timebase_freq);
+#else
+	plat = dev_get_platdata(dev);
+#endif
 
 	/*
 	 * Bind riscv-timer driver on boot hart.
@@ -109,6 +121,11 @@ static const struct cpu_ops riscv_cpu_ops = {
 static const struct udevice_id riscv_cpu_ids[] = {
 	{ .compatible = "riscv" },
 	{ }
+};
+
+UCLASS_DRIVER(riscv_cpu) = {
+	.id		= UCLASS_SIMPLE_BUS,
+	.name		= "riscv_cpu",
 };
 
 U_BOOT_DRIVER(riscv_cpu) = {
