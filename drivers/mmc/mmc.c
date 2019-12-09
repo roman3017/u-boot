@@ -2366,7 +2366,7 @@ error:
 
 static int mmc_startup(struct mmc *mmc)
 {
-	int err, i;
+	int err = 0, i;
 	uint mult, freq;
 	u64 cmult, csize;
 	struct mmc_cmd cmd;
@@ -2383,6 +2383,7 @@ static int mmc_startup(struct mmc *mmc)
 	}
 #endif
 
+#ifndef CONFIG_MMC_SPI
 	/* Put the Card in Identify Mode */
 	cmd.cmdidx = mmc_host_is_spi(mmc) ? MMC_CMD_SEND_CID :
 		MMC_CMD_ALL_SEND_CID; /* cmd not supported in spi */
@@ -2391,6 +2392,7 @@ static int mmc_startup(struct mmc *mmc)
 
 	err = mmc_send_cmd(mmc, &cmd, NULL);
 
+#endif
 #ifdef CONFIG_MMC_QUIRKS
 	if (err && (mmc->quirks & MMC_QUIRK_RETRY_SEND_CID)) {
 		int retries = 4;
@@ -2430,12 +2432,14 @@ static int mmc_startup(struct mmc *mmc)
 			mmc->rca = (cmd.response[0] >> 16) & 0xffff;
 	}
 
+#ifndef CONFIG_MMC_SPI
 	/* Get the Card-Specific Data */
 	cmd.cmdidx = MMC_CMD_SEND_CSD;
 	cmd.resp_type = MMC_RSP_R2;
 	cmd.cmdarg = mmc->rca << 16;
 
 	err = mmc_send_cmd(mmc, &cmd, NULL);
+#endif
 
 	if (err)
 		return err;
