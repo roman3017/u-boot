@@ -3,6 +3,7 @@
 dtb-$(CONFIG_TARGET_AX25_AE350) += ae350_32.dtb ae350_64.dtb
 dtb-$(CONFIG_TARGET_SIFIVE_FU540) += hifive-unleashed-a00.dtb
 dtb-$(CONFIG_TARGET_VEXRISCV_SAXON) += saxon.dtb
+dtb-$(CONFIG_TARGET_VEXRISCV_SAXON) += saxon_arty7.dtb
 
 targets += $(dtb-y)
 
