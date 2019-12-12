@@ -159,8 +159,8 @@ static int vexriscv_spi_xfer(struct udevice *dev, unsigned int bitlen,
 	if (flags & SPI_XFER_BEGIN)
 		spi_spinal_lib_set_cs(spi, slave->cs, spi->ss_active_high & BIT(slave->cs) ? 1 : 0);
 
-	/*if(spi->cmd_fifo_depth > 1 && spi->rsp_fifo_depth > 1) {
-		u32 cmd = SPI_CMD_WRITE | SPI_CMD_READ;
+	if(spi->cmd_fifo_depth > 1 && spi->rsp_fifo_depth > 1) {
+		u32 cmd = (tx_ptr ? SPI_CMD_WRITE : 0) | SPI_CMD_READ;
 		u32 token = min(spi->cmd_fifo_depth, spi->rsp_fifo_depth);
 		while (count < len) {
 			{	//rsp
@@ -171,7 +171,7 @@ static int vexriscv_spi_xfer(struct udevice *dev, unsigned int bitlen,
 				ptr = rx_ptr + count;
 				end = ptr + burst;
 				if(rx_ptr) {while(ptr != end) {*ptr++ = spi_spinal_lib_rsp(spi);}}
-				else {while(ptr != end) {ptr++; spi_spinal_lib_rsp(spi);}}
+				else {while(ptr != end) {ptr++; volatile x = spi_spinal_lib_rsp(spi);}}
 				count += burst;
 				token += burst;
 			}
@@ -188,7 +188,7 @@ static int vexriscv_spi_xfer(struct udevice *dev, unsigned int bitlen,
 				token -= burst;
 			}
 		}
-	} else*/ {
+	} else {
 		u32 cmd = (tx_ptr ? SPI_CMD_WRITE : 0) | SPI_CMD_READ;
 		while (count < len) {
 			u32 data = tx_ptr ? tx_ptr[count] : 0;
