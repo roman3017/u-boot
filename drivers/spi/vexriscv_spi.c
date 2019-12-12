@@ -14,6 +14,8 @@
 #include <spi.h>
 #include <asm/io.h>
 
+
+
 #define SPI_CMD_WRITE (1 << 8)
 #define SPI_CMD_READ (1 << 9)
 #define SPI_CMD_SS (1 << 11)
@@ -86,8 +88,7 @@ static u32 spi_spinal_lib_rsp(struct vexriscv_spi_privdata *hw)
 static u32 spi_spinal_lib_rsp_pull(struct vexriscv_spi_privdata *hw)
 {
 	u32 rsp;
-	while(((s32)(rsp = spi_spinal_lib_rsp(hw))) < 0)
-		udelay(1);
+	while(((s32)(rsp = spi_spinal_lib_rsp(hw))) < 0);
 	return rsp;
 }
 
@@ -158,7 +159,7 @@ static int vexriscv_spi_xfer(struct udevice *dev, unsigned int bitlen,
 	if (flags & SPI_XFER_BEGIN)
 		spi_spinal_lib_set_cs(spi, slave->cs, spi->ss_active_high & BIT(slave->cs) ? 1 : 0);
 
-	if(spi->cmd_fifo_depth > 1 && spi->rsp_fifo_depth > 1) {
+	/*if(spi->cmd_fifo_depth > 1 && spi->rsp_fifo_depth > 1) {
 		u32 cmd = SPI_CMD_WRITE | SPI_CMD_READ;
 		u32 token = min(spi->cmd_fifo_depth, spi->rsp_fifo_depth);
 		while (count < len) {
@@ -187,7 +188,7 @@ static int vexriscv_spi_xfer(struct udevice *dev, unsigned int bitlen,
 				token -= burst;
 			}
 		}
-	} else {
+	} else*/ {
 		u32 cmd = (tx_ptr ? SPI_CMD_WRITE : 0) | SPI_CMD_READ;
 		while (count < len) {
 			u32 data = tx_ptr ? tx_ptr[count] : 0;
