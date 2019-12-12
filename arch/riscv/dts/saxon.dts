@@ -76,7 +76,7 @@
     mmc0: mmc@0 {
       compatible = "mmc-spi-slot";
       reg = <0>;
-      spi-max-frequency = <10000000>;
+      spi-max-frequency = <25000000>;
     };
   };
 };
