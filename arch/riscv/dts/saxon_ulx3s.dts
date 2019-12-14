@@ -55,8 +55,8 @@
     #size-cells = <1>;
     ranges;
 
-    machineMode: sbi@81FF0000 {
-      reg = <0x81FF0000 0x10000>;
+    machineMode: sbi@80800000 {
+      reg = <0x80800000 0x10000>;
     };
   };
 
