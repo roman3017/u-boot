@@ -71,7 +71,7 @@ static void spi_spinal_lib_cmd(struct vexriscv_spi_privdata *hw, u32 cmd)
 static void spi_spinal_lib_cmd_wait(struct vexriscv_spi_privdata *hw)
 {
 	while(spi_spinal_lib_cmd_availability(hw) == 0)
-		udelay(1);
+		;//udelay(1);
 }
 
 static u32 spi_spinal_lib_rsp(struct vexriscv_spi_privdata *hw)
@@ -82,13 +82,14 @@ static u32 spi_spinal_lib_rsp(struct vexriscv_spi_privdata *hw)
 //static void spi_spinal_lib_rsp_wait(struct vexriscv_spi_privdata *hw)
 //{
 //	while(spi_spinal_lib_rsp_occupancy(hw) == 0)
-//	udelay(1);
+//		;//udelay(1);
 //}
 
 static u32 spi_spinal_lib_rsp_pull(struct vexriscv_spi_privdata *hw)
 {
 	u32 rsp;
-	while(((s32)(rsp = spi_spinal_lib_rsp(hw))) < 0);
+	while(((s32)(rsp = spi_spinal_lib_rsp(hw))) < 0)
+		;//udelay(1);
 	return rsp;
 }
 
@@ -99,6 +100,7 @@ static void spi_spinal_lib_set_cs(struct vexriscv_spi_privdata *hw, u32 cs, bool
 	spi_spinal_lib_cmd_wait(hw);
 }
 
+#if CONFIG_IS_ENABLED(OF_CONTROL) && !CONFIG_IS_ENABLED(OF_PLATDATA)
 static int vexriscv_spi_ofdata_to_platdata(struct udevice *dev)
 {
 	debug("!!!%s:%d\n",__func__,__LINE__);
@@ -119,6 +121,7 @@ static int vexriscv_spi_ofdata_to_platdata(struct udevice *dev)
 
 	return 0;
 }
+#endif /* OF_CONTROL && !OF_PLATDATA */
 
 static int vexriscv_spi_probe(struct udevice *dev)
 {
@@ -146,7 +149,7 @@ static int vexriscv_spi_remove(struct udevice *dev)
 static int vexriscv_spi_xfer(struct udevice *dev, unsigned int bitlen,
 			    const void *dout, void *din, unsigned long flags)
 {
-	debug("!!!%s:%d\n",__func__,__LINE__);
+	//debug("!!!%s:%d\n",__func__,__LINE__);
 	struct udevice *bus = dev->parent;
 	struct vexriscv_spi_privdata *spi = dev_get_priv(bus);
 	struct dm_spi_slave_platdata *slave = dev_get_parent_platdata(dev);
@@ -255,6 +258,12 @@ static int vexriscv_cs_info(struct udevice *dev, uint cs,
 	return -EINVAL;
 }
 
+static int vexriscv_spi_bind(struct udevice *dev)
+{
+	debug("!!!%s:%d\n",__func__,__LINE__);
+	return 0;
+}
+
 static const struct dm_spi_ops vexriscv_spi_ops = {
 	.xfer	= vexriscv_spi_xfer,
 	.set_speed	= vexriscv_spi_set_speed,
@@ -262,19 +271,35 @@ static const struct dm_spi_ops vexriscv_spi_ops = {
 	.cs_info	= vexriscv_cs_info,
 };
 
+#if CONFIG_IS_ENABLED(OF_CONTROL) && !CONFIG_IS_ENABLED(OF_PLATDATA)
 static const struct udevice_id vexriscv_spi_ids[] = {
 	{ .compatible = "vexriscv,spi" },
 	{ }
 };
+#endif /* OF_CONTROL && !OF_PLATDATA */
 
 U_BOOT_DRIVER(vexriscv_spi) = {
 	.name	= "vexriscv_spi",
 	.id	= UCLASS_SPI,
+#if CONFIG_IS_ENABLED(OF_CONTROL) && !CONFIG_IS_ENABLED(OF_PLATDATA)
 	.of_match = vexriscv_spi_ids,
-	.ops	= &vexriscv_spi_ops,
 	.ofdata_to_platdata = vexriscv_spi_ofdata_to_platdata,
 	.platdata_auto_alloc_size	= sizeof(struct dm_spi_slave_platdata),
 	.priv_auto_alloc_size = sizeof(struct vexriscv_spi_privdata),
+#endif /* OF_CONTROL && !OF_PLATDATA */
 	.probe	= vexriscv_spi_probe,
+	.bind = vexriscv_spi_bind,
+	.ops	= &vexriscv_spi_ops,
 	.remove	= vexriscv_spi_remove,
 };
+
+#if !CONFIG_IS_ENABLED(OF_CONTROL) || CONFIG_IS_ENABLED(OF_PLATDATA)
+static const struct vexriscv_spi_privdata vexriscv_spi_info_non_fdt = {
+  .regs = (void *)0x10020000,
+	.clock = 50000000,
+};
+U_BOOT_DEVICE(vexriscv_spi_non_fdt) = {
+  .name = "vexriscv_spi",
+  .platdata = &vexriscv_spi_info_non_fdt,
+};
+#endif /*!CONFIG_IS_ENABLED(OF_CONTROL) || CONFIG_IS_ENABLED(OF_PLATDATA)*/

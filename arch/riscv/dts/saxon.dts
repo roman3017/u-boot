@@ -11,8 +11,6 @@
   aliases {
     serial0 = &serial0;
     timer0 = &timer0;
-    spi0 = &spi0;
-    mmc0 = &mmc0;
   };
 
   chosen {

@@ -172,6 +172,11 @@ static int vexriscv_probe(struct udevice *dev)
 	return 0;
 }
 
+static int vexriscv_bind(struct udevice *dev)
+{
+	debug("%s:%d\n",__func__,__LINE__);
+	return 0;
+}
 static const struct dm_serial_ops vexriscv_ops = {
 	.setbrg = vexriscv_setbrg,
 	.getc = vexriscv_getc,
@@ -198,6 +203,7 @@ U_BOOT_DRIVER(vexriscv_serial) = {
 	.ofdata_to_platdata = vexriscv_ofdata_to_platdata,
 	.platdata_auto_alloc_size = sizeof(struct vexriscv_uart_platdata),
 #endif
+	.bind = vexriscv_bind,
 	.probe = vexriscv_probe,
 	.ops	= &vexriscv_ops,
 #if !CONFIG_IS_ENABLED(OF_CONTROL)
@@ -205,6 +211,7 @@ U_BOOT_DRIVER(vexriscv_serial) = {
 #endif
 };
 
+#if !CONFIG_IS_ENABLED(OF_CONTROL) || CONFIG_IS_ENABLED(OF_PLATDATA)
 static const struct vexriscv_uart_platdata vexriscv_serial_info_non_fdt = {
   .regs = (void *)CONFIG_DEBUG_UART_BASE,
   .baudrate = CONFIG_BAUDRATE,
@@ -214,3 +221,4 @@ U_BOOT_DEVICE(vexriscv_serial_non_fdt) = {
   .name = "vexriscv_serial",
   .platdata = &vexriscv_serial_info_non_fdt,
 };
+#endif /*!CONFIG_IS_ENABLED(OF_CONTROL) || CONFIG_IS_ENABLED(OF_PLATDATA)*/
