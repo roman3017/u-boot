@@ -45,19 +45,8 @@
 
   memory {
     device_type = "memory";
-    reg = <0x80000000 0x04000000>;
+    reg = <0x80000000 0x01FF0000>;
   };
-
-  reserved-memory {
-    #address-cells = <1>;
-    #size-cells = <1>;
-    ranges;
-
-    machineMode: sbi@81FF0000 {
-      reg = <0x81FF0000 0x10000>;
-    };
-  };
-
 
   timer0: timer@10008000 {
     compatible = "vexriscv,timer";
