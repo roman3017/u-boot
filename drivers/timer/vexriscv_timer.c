@@ -70,6 +70,12 @@ static int vexriscv_probe(struct udevice *dev)
 	return 0;
 }
 
+static int vexriscv_bind(struct udevice *dev)
+{
+	debug("%s:%d\n",__func__,__LINE__);
+	return 0;
+}
+
 static const struct timer_ops vexriscv_ops = {
 	.get_count	= vexriscv_get_count,
 };
@@ -82,10 +88,11 @@ static const struct udevice_id vexriscv_of_match[] = {
 #endif
 
 U_BOOT_DRIVER(vexriscv_timer) = {
-	.name		= "vexriscv_timer",
-	.id		= UCLASS_TIMER,
-	.ops		= &vexriscv_ops,
-	.probe		= vexriscv_probe,
+	.name = "vexriscv_timer",
+	.id = UCLASS_TIMER,
+	.ops = &vexriscv_ops,
+	.probe = vexriscv_probe,
+	.bind = vexriscv_bind,
 #if CONFIG_IS_ENABLED(OF_CONTROL) && !CONFIG_IS_ENABLED(OF_PLATDATA)
 	.of_match	= vexriscv_of_match,
 	.ofdata_to_platdata = vexriscv_ofdata_to_platdata,
@@ -93,6 +100,7 @@ U_BOOT_DRIVER(vexriscv_timer) = {
 #endif
 };
 
+#if !CONFIG_IS_ENABLED(OF_CONTROL) || CONFIG_IS_ENABLED(OF_PLATDATA)
 static const struct vexriscv_platdata timer_vexriscv_info_non_fdt = {
   .regs = (fdt_addr_t)0x10008000,
 	.clock_rate = 50000000,
@@ -101,3 +109,4 @@ U_BOOT_DEVICE(timer_vexriscv_non_fdt) = {
   .name = "vexriscv_timer",
   .platdata = &timer_vexriscv_info_non_fdt,
 };
+#endif /*!CONFIG_IS_ENABLED(OF_CONTROL) || CONFIG_IS_ENABLED(OF_PLATDATA)*/
