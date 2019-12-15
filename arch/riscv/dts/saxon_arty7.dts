@@ -71,9 +71,9 @@
     num-cs = <1>;
     cs-gpios = <0>;
     clock-frequency = <100000000>;
-    mmc0: mmc@0 {
+    mmc0: mmc@1 {
       compatible = "mmc-spi-slot";
-      reg = <0>;
+      reg = <1>;
       spi-max-frequency = <25000000>;
     };
   };
