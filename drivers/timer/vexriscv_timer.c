@@ -9,8 +9,6 @@
 #include <clk.h>
 #include <timer.h>
 
-DECLARE_GLOBAL_DATA_PTR;
-
 struct vexriscv_platdata {
 	fdt_addr_t regs;
 	u32 clock_rate;
