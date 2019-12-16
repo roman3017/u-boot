@@ -11,8 +11,6 @@
 #include <fdtdec.h>
 #include <serial.h>
 
-DECLARE_GLOBAL_DATA_PTR;
-
 #define STATUS_TX 16
 #define STATUS_RX 24
 
@@ -168,13 +166,14 @@ static int vexriscv_ofdata_to_platdata(struct udevice *dev)
 static int vexriscv_probe(struct udevice *dev)
 {
   UNUSED(dev);
-	debug("!!!%s\n",__func__);
+	debug("!!!%s:%d\n",__func__,__LINE__);
 	return 0;
 }
 
 static int vexriscv_bind(struct udevice *dev)
 {
-	debug("%s:%d\n",__func__,__LINE__);
+  UNUSED(dev);
+	debug("!!!%s:%d\n",__func__,__LINE__);
 	return 0;
 }
 static const struct dm_serial_ops vexriscv_ops = {
