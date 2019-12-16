@@ -7,7 +7,11 @@
 #include <common.h>
 #include <cpu.h>
 #include <dm.h>
+#include <mmc.h>
+#include <spi.h>
 #include <spl.h>
+
+DECLARE_GLOBAL_DATA_PTR;
 
 int board_init(void)
 {
@@ -65,16 +69,6 @@ s32 fdtdec_get_int(const void *blob, int node, const char *prop_name, s32 defaul
 	debug("!!!%s\n",__func__);
 	return -1;
 }
-int dm_scan_fdt_dev(struct udevice *dev)
-{
-	debug("!!!%s\n",__func__);
-	return -1;
-}
-int fdtdec_setup_memory_banksize(void)
-{
-	debug("!!!%s\n",__func__);
-	return -1;
-}
 const void *fdt_getprop(const void *fdt, int nodeoffset, const char *name, int *lenp)
 {
 	debug("!!!%s\n",__func__);
@@ -95,14 +89,36 @@ int fdt_path_offset(const void *fdt, const char *path)
 	debug("!!!%s\n",__func__);
 	return -1;
 }
+#endif /* !CONFIG_SPL_OF_LIBFDT */
 
-static const struct driver_info root_info = {
-	.name		= "root_driver",
-};
-U_BOOT_DEVICE(root_non_fdt) = {
-  .name = "root_driver",
-  .platdata = &root_info,
-};
+#endif /* CONFIG_SPL_BUILD */
+
+#if !CONFIG_IS_ENABLED(OF_CONTROL) || CONFIG_IS_ENABLED(OF_PLATDATA)
+
+int fdtdec_setup_mem_size_base(void)
+{
+	debug("!!!%s\n",__func__);
+	gd->ram_base = 0x80000000;
+	gd->ram_size = 0x02000000;
+	gd->ram_top = gd->ram_base + gd->ram_size - 1;
+	return 0;
+}
+int fdtdec_setup_memory_banksize(void)
+{
+	debug("!!!%s\n",__func__);
+	return 0;
+}
+
+int fdtdec_get_alias_seq(const void *blob, const char *base, int offset, int *seqp)
+{
+	debug("!!!%s\n",__func__);
+	return 0;
+}
+int dm_scan_fdt_dev(struct udevice *dev)
+{
+	debug("!!!%s\n",__func__);
+	return -1;
+}
 
 static const struct cpu_platdata riscv_cpu_info = {
   .cpu_id = 0,
@@ -112,5 +128,36 @@ U_BOOT_DEVICE(riscv_cpu_non_fdt) = {
   .name = "riscv_cpu",
 	.platdata = &riscv_cpu_info,
 };
-#endif /* !CONFIG_SPL_OF_LIBFDT && !CONFIG_SPL_OF_CONTROL */
-#endif /* CONFIG_SPL_BUILD */
+
+/* TODO: move this struct to header file */
+struct mmc_spi_plat {
+	struct mmc_config cfg;
+	struct mmc mmc;
+};
+
+static const struct mmc_spi_plat mmc_spi_info_non_fdt = {
+	.cfg = {
+		.f_min = 0,
+		.f_max = 25000000,
+	},
+	.mmc = {
+
+	},
+};
+U_BOOT_DEVICE(mmc_spi_non_fdt) = {
+	.name = "mmc_spi",
+	.platdata = &mmc_spi_info_non_fdt,
+};
+
+static const struct dm_spi_slave_platdata vexriscv_spi_info_non_fdt = {
+};
+
+U_BOOT_DEVICE(vexriscv_spi_non_fdt) = {
+  .name = "vexriscv_spi",
+  .platdata = &vexriscv_spi_info_non_fdt,
+};
+/*
+vexriscv_spi_non_fdt (UCLASS_SPI);
+	mmc_spi_non_fdt (UCLASS_MMC);
+*/
+#endif /*!CONFIG_IS_ENABLED(OF_CONTROL) || CONFIG_IS_ENABLED(OF_PLATDATA)*/

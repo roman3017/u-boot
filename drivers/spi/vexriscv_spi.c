@@ -14,8 +14,6 @@
 #include <spi.h>
 #include <asm/io.h>
 
-
-
 #define SPI_CMD_WRITE (1 << 8)
 #define SPI_CMD_READ (1 << 9)
 #define SPI_CMD_SS (1 << 11)
@@ -285,21 +283,11 @@ U_BOOT_DRIVER(vexriscv_spi) = {
 	.of_match = vexriscv_spi_ids,
 	.ofdata_to_platdata = vexriscv_spi_ofdata_to_platdata,
 	.platdata_auto_alloc_size	= sizeof(struct dm_spi_slave_platdata),
-	.priv_auto_alloc_size = sizeof(struct vexriscv_spi_privdata),
 #endif /* OF_CONTROL && !OF_PLATDATA */
-	.probe	= vexriscv_spi_probe,
+	.priv_auto_alloc_size = sizeof(struct vexriscv_spi_privdata),
 	.bind = vexriscv_spi_bind,
+	.probe	= vexriscv_spi_probe,
 	.ops	= &vexriscv_spi_ops,
 	.remove	= vexriscv_spi_remove,
+	.flags	= DM_FLAG_PRE_RELOC,
 };
-
-#if !CONFIG_IS_ENABLED(OF_CONTROL) || CONFIG_IS_ENABLED(OF_PLATDATA)
-static const struct vexriscv_spi_privdata vexriscv_spi_info_non_fdt = {
-  .regs = (void *)0x10020000,
-	.clock = 50000000,
-};
-U_BOOT_DEVICE(vexriscv_spi_non_fdt) = {
-  .name = "vexriscv_spi",
-  .platdata = &vexriscv_spi_info_non_fdt,
-};
-#endif /*!CONFIG_IS_ENABLED(OF_CONTROL) || CONFIG_IS_ENABLED(OF_PLATDATA)*/
