@@ -18,6 +18,5 @@ config SYS_TEXT_BASE
 config BOARD_SPECIFIC_OPTIONS # dummy
 	def_bool y
 	select GENERIC_RISCV
-	imply VEXRISCV_SERIAL
 
 endif
