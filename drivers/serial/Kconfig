@@ -357,6 +357,15 @@ config DEBUG_UART_VEXRISCV
 	  will need to provide parameters to make this work. The driver will
 	  be available until the real driver-model serial is running.
 
+config DEBUG_UART_RISCV_SBI
+	bool "RISC-V SBI UART"
+	depends on RISCV_SBI_SERIAL
+	help
+	  Select this to enable a debug UART using the serial_riscv_sbi driver. You
+	  will need to provide parameters to make this work. The driver will
+	  be available until the real driver-model serial is running.
+
+
 config DEBUG_UART_STM32
 	bool "STMicroelectronics STM32"
 	depends on STM32_SERIAL
@@ -734,6 +743,12 @@ config VEXRISCV_SERIAL
 	depends on DM_SERIAL
 	help
 	  This driver supports the Vexriscv UART. If unsure say N.
+
+config RISCV_SBI_SERIAL
+	bool "RISC-V SBI UART support"
+	depends on DM_SERIAL
+	help
+	  This driver supports the RISC-V SVI UART. If unsure say N.
 
 config STI_ASC_SERIAL
 	bool "STMicroelectronics on-chip UART"
