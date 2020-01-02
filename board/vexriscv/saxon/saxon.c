@@ -6,6 +6,7 @@
 
 #include <common.h>
 #include <cpu.h>
+#include <dm/ofnode.h>
 #include <dm.h>
 #include <mmc.h>
 #include <spi.h>
@@ -33,13 +34,14 @@ u32 spl_boot_device(void)
 	return BOOT_DEVICE_NONE;
 }
 
+#ifdef CONFIG_SPL_OS_BOOT
 int spl_start_uboot(void)
 {
-#ifdef CONFIG_SPL_OS_BOOT
-	return 0;
-#endif
+	debug("!!!%s:%d\n",__func__,__LINE__);
+	//when 0, args/dtb will be loaded too
 	return 1;
 }
+#endif
 
 #ifdef CONFIG_SPL_RAM_SUPPORT
 struct image_header *spl_get_load_buffer(ssize_t offset, size_t size)
@@ -94,6 +96,41 @@ int fdt_path_offset(const void *fdt, const char *path)
 #endif /* CONFIG_SPL_BUILD */
 
 #if !CONFIG_IS_ENABLED(OF_CONTROL) || CONFIG_IS_ENABLED(OF_PLATDATA)
+int ofnode_read_u32(ofnode node, const char *propname, u32 *outp)
+{
+	debug("!!!%s\n",__func__);
+	return 0;
+}
+u32 ofnode_read_u32_default(ofnode node, const char *propname, u32 def)
+{
+	debug("!!!%s\n",__func__);
+	return def;
+}
+bool ofnode_read_bool(ofnode node, const char *propname)
+{
+	debug("!!!%s\n",__func__);
+	return false;
+}
+ofnode ofnode_path(const char *path)
+{
+	debug("!!!%s\n",__func__);
+	return ofnode_null();
+}
+ofnode ofnode_first_subnode(ofnode node)
+{
+	debug("!!!%s\n",__func__);
+	return ofnode_null();
+}
+ofnode ofnode_next_subnode(ofnode node)
+{
+	debug("!!!%s\n",__func__);
+	return ofnode_null();
+}
+const char *ofnode_read_string(ofnode node, const char *propname)
+{
+	debug("!!!%s\n",__func__);
+	return 0;
+}
 
 int fdtdec_setup_mem_size_base(void)
 {
@@ -117,47 +154,6 @@ int fdtdec_get_alias_seq(const void *blob, const char *base, int offset, int *se
 int dm_scan_fdt_dev(struct udevice *dev)
 {
 	debug("!!!%s\n",__func__);
-	return -1;
+	return 0;
 }
-
-static const struct cpu_platdata riscv_cpu_info = {
-  .cpu_id = 0,
-  .timebase_freq = 50000000,
-};
-U_BOOT_DEVICE(riscv_cpu_non_fdt) = {
-  .name = "riscv_cpu",
-	.platdata = &riscv_cpu_info,
-};
-
-/* TODO: move this struct to header file */
-struct mmc_spi_plat {
-	struct mmc_config cfg;
-	struct mmc mmc;
-};
-
-static const struct mmc_spi_plat mmc_spi_info_non_fdt = {
-	.cfg = {
-		.f_min = 0,
-		.f_max = 25000000,
-	},
-	.mmc = {
-
-	},
-};
-U_BOOT_DEVICE(mmc_spi_non_fdt) = {
-	.name = "mmc_spi",
-	.platdata = &mmc_spi_info_non_fdt,
-};
-
-static const struct dm_spi_slave_platdata vexriscv_spi_info_non_fdt = {
-};
-
-U_BOOT_DEVICE(vexriscv_spi_non_fdt) = {
-  .name = "vexriscv_spi",
-  .platdata = &vexriscv_spi_info_non_fdt,
-};
-/*
-vexriscv_spi_non_fdt (UCLASS_SPI);
-	mmc_spi_non_fdt (UCLASS_MMC);
-*/
 #endif /*!CONFIG_IS_ENABLED(OF_CONTROL) || CONFIG_IS_ENABLED(OF_PLATDATA)*/
