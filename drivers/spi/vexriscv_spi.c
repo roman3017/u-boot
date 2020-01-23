@@ -138,7 +138,7 @@ static int vexriscv_spi_ofdata_to_platdata(struct udevice *dev)
 	plat->clock = dev_read_u32_default(dev, "clock-frequency",
 		50000000);
 	plat->max_hz = dev_read_u32_default(dev, "spi-max-frequency",
-		100000);
+		plat->clock/2);
 	plat->rsp_fifo_depth = dev_read_u32_default(dev, "rsp_fifo_depth", 256);
 	plat->cmd_fifo_depth = dev_read_u32_default(dev, "cmd_fifo_depth", 256);
 
