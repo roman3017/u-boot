@@ -13,7 +13,6 @@
 #define CONFIG_SYS_LOAD_ADDR CONFIG_SYS_TEXT_BASE
 #define CONFIG_SYS_INIT_SP_ADDR		CONFIG_SYS_LOAD_ADDR
 #define CONFIG_SYS_MALLOC_LEN		SZ_256K
-#define CONFIG_ENV_SIZE			SZ_4K
 #define	CONFIG_EXTRA_ENV_SETTINGS	"initrd_high=0xffffffff\0" \
                                   "fdt_high=0xffffffff\0"
 #ifdef CONFIG_SPL_BUILD
