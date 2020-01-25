@@ -163,9 +163,7 @@ U_BOOT_DRIVER(riscv_sbi_serial) = {
 
 #if !CONFIG_IS_ENABLED(OF_CONTROL) || CONFIG_IS_ENABLED(OF_PLATDATA)
 static const struct riscv_sbi_uart_platdata riscv_sbi_serial_info_non_fdt = {
-  .regs = (void *)CONFIG_DEBUG_UART_BASE,
-  .baudrate = CONFIG_BAUDRATE,
-	.clock = CONFIG_DEBUG_UART_CLOCK,
+  .getc_buffer = -1,
 };
 U_BOOT_DEVICE(riscv_sbi_serial_non_fdt) = {
   .name = "riscv_sbi_serial",
