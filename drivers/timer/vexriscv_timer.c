@@ -101,7 +101,7 @@ U_BOOT_DRIVER(vexriscv_timer) = {
 #if !CONFIG_IS_ENABLED(OF_CONTROL) || CONFIG_IS_ENABLED(OF_PLATDATA)
 static const struct vexriscv_platdata timer_vexriscv_info_non_fdt = {
   .regs = (fdt_addr_t)0x10008000,
-	.clock_rate = 50000000,
+	.clock_rate = CONFIG_DEBUG_UART_CLOCK,
 };
 U_BOOT_DEVICE(timer_vexriscv_non_fdt) = {
   .name = "vexriscv_timer",
