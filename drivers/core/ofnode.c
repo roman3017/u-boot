@@ -41,7 +41,10 @@ int ofnode_read_u32(ofnode node, const char *propname, u32 *outp)
 
 u32 ofnode_read_u32_default(ofnode node, const char *propname, u32 def)
 {
-	assert(ofnode_valid(node));
+	if (!ofnode_valid(node)) {
+		debug("%s node not valid\n", __func__);
+		return def;
+	}
 	ofnode_read_u32(node, propname, &def);
 
 	return def;
