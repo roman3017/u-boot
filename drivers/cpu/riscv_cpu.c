@@ -123,11 +123,6 @@ static const struct udevice_id riscv_cpu_ids[] = {
 	{ }
 };
 
-UCLASS_DRIVER(riscv_cpu) = {
-	.id		= UCLASS_SIMPLE_BUS,
-	.name		= "riscv_cpu",
-};
-
 U_BOOT_DRIVER(riscv_cpu) = {
 	.name = "riscv_cpu",
 	.id = UCLASS_CPU,
