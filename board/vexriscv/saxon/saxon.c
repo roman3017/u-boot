@@ -6,6 +6,7 @@
 
 #include <common.h>
 #include <spl.h>
+#include <log.h>
 
 int board_init(void)
 {

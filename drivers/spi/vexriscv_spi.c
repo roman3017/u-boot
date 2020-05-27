@@ -14,6 +14,7 @@
 #include <fdtdec.h>
 #include <spi.h>
 #include <asm/io.h>
+#include <log.h>
 
 #define SPI_CMD_WRITE (1 << 8)
 #define SPI_CMD_READ (1 << 9)
