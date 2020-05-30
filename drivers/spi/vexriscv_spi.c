@@ -324,11 +324,11 @@ U_BOOT_DRIVER(vexriscv_spi) = {
 #if !CONFIG_IS_ENABLED(OF_CONTROL) || CONFIG_IS_ENABLED(OF_PLATDATA)
 static const struct vexriscv_spi_platdata vexriscv_spi_info_non_fdt = {
 	.regs = (void *)0x10020000,
-	.cs = 1,
+	.cs = 0,
 	.max_hz = CONFIG_DEBUG_UART_CLOCK/2,
 	.mode = 0,
 	.clock = CONFIG_DEBUG_UART_CLOCK,
-	.num_cs = 2,
+	.num_cs = 1,
 	.rsp_fifo_depth = 256,
 	.cmd_fifo_depth = 256,
 	.ss_active_high = 0,
