@@ -434,6 +434,11 @@ config SMC911X_16_BIT
 endchoice
 endif #SMC911X
 
+config SPINAL_LIB_MAC
+	bool "Enable Spinal MAC Ethernet support"
+	help
+	  Enable the support for Spinal GMAC Ethernet controller
+
 config SUN7I_GMAC
 	bool "Enable Allwinner GMAC Ethernet support"
 	help
