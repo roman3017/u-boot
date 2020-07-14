@@ -10,13 +10,11 @@
 
   aliases {
     serial0 = &serial0;
-    timer0 = &timer0;
   };
 
   chosen {
     bootargs = "console=ttyS0,115200n8";
     stdout-path = "serial0:115200n8";
-    tick-timer = "timer0";
   };
 
   cpus {
@@ -24,40 +22,48 @@
     #size-cells = <0>;
     timebase-frequency = <100000000>;
 
-    cpu@0 {
+    cpu0: cpu@0{
       device_type = "cpu";
       compatible = "riscv";
-      riscv,isa = "rv32im";
+      riscv,isa = "rv32ima";
       clock-frequency = <100000000>;
       mmu-type = "riscv,sv32";
       reg = <0>;
-      i-cache-size = <0x1000>;
-      i-cache-line-size = <64>;
-      d-cache-size = <0x1000>;
-      d-cache-line-size = <64>;
+      status = "okay";
       intc0: interrupt-controller {
           #interrupt-cells = <1>;
           interrupt-controller;
           compatible = "riscv,cpu-intc";
       };
     };
+
+    cpu1: cpu@1{
+      device_type = "cpu";
+      compatible = "riscv";
+      riscv,isa = "rv32ima";
+      clock-frequency = <100000000>;
+      mmu-type = "riscv,sv32";
+      reg = <1>;
+      status = "okay";
+      intc1: interrupt-controller {
+          #interrupt-cells = <1>;
+          interrupt-controller;
+          compatible = "riscv,cpu-intc";
+      };
+    };
+
   };
 
   memory {
     device_type = "memory";
-    reg = <0x80000000 0x01ff0000>;
-  };
-
-  timer0: timer@10008000 {
-    compatible = "vexriscv,timer";
-    reg = <0x10008000 0x10>;
-    clock-frequency = <100000000>;
+    reg = <0x80100000 0x07F00000>;
   };
 
   serial0: serial@10010000 {
     device_type = "serial";
     compatible = "riscv_sbi,uart";
   };
+
 
   spi0: spi@10020000 {
     compatible = "vexriscv,spi";
@@ -67,7 +73,6 @@
     cmd_fifo_depth = <256>;
     rsp_fifo_depth = <256>;
     num-cs = <2>;
-    cs-gpios = <0>;
     clock-frequency = <100000000>;
     mmc0: mmc@1 {
       compatible = "mmc-spi-slot";
@@ -75,4 +80,10 @@
       spi-max-frequency = <25000000>;
     };
   };
+
+  mac0: mac@10040000 {
+    compatible = "spinal,lib_mac";
+    reg = <0x10040000 0x1000>;
+  };
+
 };

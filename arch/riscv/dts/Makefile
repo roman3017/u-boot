@@ -5,7 +5,7 @@ dtb-$(CONFIG_TARGET_SIFIVE_FU540) += hifive-unleashed-a00.dtb
 dtb-$(CONFIG_TARGET_VEXRISCV_SAXON) += saxon.dtb
 dtb-$(CONFIG_TARGET_VEXRISCV_SAXON) += saxon_arty_a7.dtb
 dtb-$(CONFIG_TARGET_VEXRISCV_SAXON) += saxon_arty_a7_smp.dtb
-dtb-$(CONFIG_TARGET_VEXRISCV_SAXON) += saxon_nexysa7.dtb
+dtb-$(CONFIG_TARGET_VEXRISCV_SAXON) += saxon_nexys_a7.dtb
 dtb-$(CONFIG_TARGET_VEXRISCV_SAXON) += saxon_ulx3s.dtb
 dtb-$(CONFIG_TARGET_VEXRISCV_SAXON) += saxon_tang.dtb
 
