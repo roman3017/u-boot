@@ -10,15 +10,11 @@
 
   aliases {
     serial0 = &serial0;
-    timer0 = &timer0;
-    spi0 = &spi0;
-    mmc0 = &mmc0;
   };
 
   chosen {
     bootargs = "console=ttyS0,115200n8";
     stdout-path = "serial0:115200n8";
-    tick-timer = "timer0";
   };
 
   cpus {
@@ -26,18 +22,30 @@
     #size-cells = <0>;
     timebase-frequency = <50000000>;
 
-    cpu@0 {
+    cpu0: cpu@0{
       device_type = "cpu";
       compatible = "riscv";
-      riscv,isa = "rv32im";
+      riscv,isa = "rv32ima";
       clock-frequency = <50000000>;
       mmu-type = "riscv,sv32";
       reg = <0>;
-      i-cache-size = <0x1000>;
-      i-cache-line-size = <64>;
-      d-cache-size = <0x1000>;
-      d-cache-line-size = <64>;
+      status = "okay";
       intc0: interrupt-controller {
+          #interrupt-cells = <1>;
+          interrupt-controller;
+          compatible = "riscv,cpu-intc";
+      };
+    };
+
+    cpu1: cpu@1{
+      device_type = "cpu";
+      compatible = "riscv";
+      riscv,isa = "rv32ima";
+      clock-frequency = <50000000>;
+      mmu-type = "riscv,sv32";
+      reg = <1>;
+      status = "okay";
+      intc1: interrupt-controller {
           #interrupt-cells = <1>;
           interrupt-controller;
           compatible = "riscv,cpu-intc";
@@ -48,23 +56,6 @@
   memory {
     device_type = "memory";
     reg = <0x80000000 0x02000000>;
-  };
-
-  reserved-memory {
-    #address-cells = <1>;
-    #size-cells = <1>;
-    ranges;
-
-    machineMode: sbi@80800000 {
-      reg = <0x80800000 0x10000>;
-    };
-  };
-
-
-  timer0: timer@10008000 {
-    compatible = "vexriscv,timer";
-    reg = <0x10008000 0x10>;
-    clock-frequency = <50000000>;
   };
 
   serial0: serial@10010000 {
