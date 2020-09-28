@@ -56,14 +56,27 @@
 
   memory {
     device_type = "memory";
-    reg = <0x80100000 0x07F00000>;
+    reg = <0x80000000 0x08000000>;
+  };
+
+  reserved-memory {
+      #address-cells = <1>;
+      #size-cells = <1>;
+      ranges;
+
+      opensbi: sbi@80F80000 {
+          reg = <0x80F80000 0x00070000>;
+      };
+
+      framebuffer: sbi@87000000 {
+          reg = <0x87000000 0x01000000>;
+      };
   };
 
   serial0: serial@10010000 {
     device_type = "serial";
     compatible = "riscv_sbi,uart";
   };
-
 
   spi0: spi@10020000 {
     compatible = "vexriscv,spi";
