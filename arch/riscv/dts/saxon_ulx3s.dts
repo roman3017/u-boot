@@ -51,6 +51,36 @@
           compatible = "riscv,cpu-intc";
       };
     };
+
+    cpu2: cpu@2{
+      device_type = "cpu";
+      compatible = "riscv";
+      riscv,isa = "rv32ima";
+      clock-frequency = <50000000>;
+      mmu-type = "riscv,sv32";
+      reg = <2>;
+      status = "okay";
+      intc2: interrupt-controller {
+          #interrupt-cells = <1>;
+          interrupt-controller;
+          compatible = "riscv,cpu-intc";
+      };
+    };
+
+    cpu3: cpu@3{
+      device_type = "cpu";
+      compatible = "riscv";
+      riscv,isa = "rv32ima";
+      clock-frequency = <50000000>;
+      mmu-type = "riscv,sv32";
+      reg = <3>;
+      status = "okay";
+      intc3: interrupt-controller {
+          #interrupt-cells = <1>;
+          interrupt-controller;
+          compatible = "riscv,cpu-intc";
+      };
+    };
   };
 
   memory {
