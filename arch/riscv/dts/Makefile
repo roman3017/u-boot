@@ -7,6 +7,7 @@ dtb-$(CONFIG_TARGET_VEXRISCV_SAXON) += saxon_arty_a7.dtb
 dtb-$(CONFIG_TARGET_VEXRISCV_SAXON) += saxon_nexys_a7.dtb
 dtb-$(CONFIG_TARGET_VEXRISCV_SAXON) += saxon_ulx3s.dtb
 dtb-$(CONFIG_TARGET_VEXRISCV_SAXON) += saxon_tang.dtb
+dtb-$(CONFIG_TARGET_VEXRISCV_SAXON) += saxon_bsp.dtb
 
 targets += $(dtb-y)
 
