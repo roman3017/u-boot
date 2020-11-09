@@ -32,8 +32,12 @@ struct fdt_region;
 #define CONFIG_FIT_VERBOSE	1 /* enable fit_format_{error,warning}() */
 #define CONFIG_FIT_ENABLE_RSASSA_PSS_SUPPORT 1
 #define CONFIG_FIT_ENABLE_SHA256_SUPPORT
+#define CONFIG_FIT_ENABLE_SHA384_SUPPORT
+#define CONFIG_FIT_ENABLE_SHA512_SUPPORT
 #define CONFIG_SHA1
 #define CONFIG_SHA256
+#define CONFIG_SHA384
+#define CONFIG_SHA512
 
 #define IMAGE_ENABLE_IGNORE	0
 #define IMAGE_INDENT_STRING	""
@@ -90,6 +94,20 @@ struct fdt_region;
 #define IMAGE_ENABLE_SHA256	1
 #else
 #define IMAGE_ENABLE_SHA256	0
+#endif
+
+#if defined(CONFIG_FIT_ENABLE_SHA384_SUPPORT) || \
+	defined(CONFIG_SPL_SHA384_SUPPORT)
+#define IMAGE_ENABLE_SHA384	1
+#else
+#define IMAGE_ENABLE_SHA384	0
+#endif
+
+#if defined(CONFIG_FIT_ENABLE_SHA512_SUPPORT) || \
+	defined(CONFIG_SPL_SHA512_SUPPORT)
+#define IMAGE_ENABLE_SHA512	1
+#else
+#define IMAGE_ENABLE_SHA512	0
 #endif
 
 #endif /* IMAGE_ENABLE_FIT */
@@ -308,6 +326,7 @@ enum {
 	IH_COMP_LZMA,			/* lzma  Compression Used	*/
 	IH_COMP_LZO,			/* lzo   Compression Used	*/
 	IH_COMP_LZ4,			/* lz4   Compression Used	*/
+	IH_COMP_ZSTD,			/* zstd   Compression Used	*/
 
 	IH_COMP_COUNT,
 };
@@ -393,7 +412,7 @@ typedef struct bootm_headers {
 	ulong		initrd_end;
 	ulong		cmdline_start;
 	ulong		cmdline_end;
-	bd_t		*kbd;
+	struct bd_info		*kbd;
 #endif
 
 	int		verify;		/* env_get("verify")[0] != 'n' */
@@ -544,10 +563,20 @@ int genimg_get_cat_count(enum ih_category category);
 /**
  * genimg_get_cat_desc() - Get the description of a category
  *
+ * @category:	Category to check
  * @return the description of a category, e.g. "architecture". This
  * effectively converts the enum to a string.
  */
 const char *genimg_get_cat_desc(enum ih_category category);
+
+/**
+ * genimg_cat_has_id() - Check whether a category has an item
+ *
+ * @category:	Category to check
+ * @id:		Item ID
+ * @return true or false as to whether a category has an item
+ */
+bool genimg_cat_has_id(enum ih_category category, uint id);
 
 int genimg_get_os_id(const char *name);
 int genimg_get_arch_id(const char *name);
@@ -736,7 +765,7 @@ int boot_ramdisk_high(struct lmb *lmb, ulong rd_data, ulong rd_len,
 		  ulong *initrd_start, ulong *initrd_end);
 int boot_get_cmdline(struct lmb *lmb, ulong *cmd_start, ulong *cmd_end);
 #ifdef CONFIG_SYS_BOOT_GET_KBD
-int boot_get_kbd(struct lmb *lmb, bd_t **kbd);
+int boot_get_kbd(struct lmb *lmb, struct bd_info **kbd);
 #endif /* CONFIG_SYS_BOOT_GET_KBD */
 #endif /* !USE_HOSTCC */
 
@@ -1444,7 +1473,7 @@ struct cipher_algo {
 		       unsigned char **cipher, int *cipher_len);
 
 	int (*add_cipher_data)(struct image_cipher_info *info,
-			       void *keydest);
+			       void *keydest, void *fit, int node_noffset);
 
 	int (*decrypt)(struct image_cipher_info *info,
 		       const void *cipher, size_t cipher_len,
@@ -1572,5 +1601,17 @@ struct fit_loadable_tbl {
 		.type = _type, \
 		.handler = _handler, \
 	}
+
+/**
+ * fit_update - update storage with FIT image
+ * @fit:        Pointer to FIT image
+ *
+ * Update firmware on storage using FIT image as input.
+ * The storage area to be update will be identified by the name
+ * in FIT and matching it to "dfu_alt_info" variable.
+ *
+ * Return:      0 on success, non-zero otherwise
+ */
+int fit_update(const void *fit);
 
 #endif	/* __IMAGE_H__ */

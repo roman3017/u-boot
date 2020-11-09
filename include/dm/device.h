@@ -197,7 +197,7 @@ struct udevice_id {
 	ulong data;
 };
 
-#if CONFIG_IS_ENABLED(OF_CONTROL)
+#if CONFIG_IS_ENABLED(OF_CONTROL) && !CONFIG_IS_ENABLED(OF_PLATDATA)
 #define of_match_ptr(_ptr)	(_ptr)
 #else
 #define of_match_ptr(_ptr)	NULL
@@ -281,6 +281,13 @@ struct driver {
 /* Get a pointer to a given driver */
 #define DM_GET_DRIVER(__name)						\
 	ll_entry_get(struct driver, __name, driver)
+
+/**
+ * Declare a macro to state a alias for a driver name. This macro will
+ * produce no code but its information will be parsed by tools like
+ * dtoc
+ */
+#define U_BOOT_DRIVER_ALIAS(__name, __alias)
 
 /**
  * dev_get_platdata() - Get the platform data for a device
@@ -532,6 +539,35 @@ int device_find_global_by_ofnode(ofnode node, struct udevice **devp);
 int device_get_global_by_ofnode(ofnode node, struct udevice **devp);
 
 /**
+ * device_get_by_driver_info() - Get a device based on driver_info
+ *
+ * Locates a device by its struct driver_info, by using its reference which
+ * is updated during the bind process.
+ *
+ * The device is probed to activate it ready for use.
+ *
+ * @info: Struct driver_info
+ * @devp: Returns pointer to device if found, otherwise this is set to NULL
+ * @return 0 if OK, -ve on error
+ */
+int device_get_by_driver_info(const struct driver_info *info,
+			      struct udevice **devp);
+
+/**
+ * device_get_by_driver_info_idx() - Get a device based on driver_info index
+ *
+ * Locates a device by its struct driver_info, by using its index number which
+ * is written into the idx field of struct phandle_1_arg, etc.
+ *
+ * The device is probed to activate it ready for use.
+ *
+ * @idx: Index number of the driver_info structure (0=first)
+ * @devp: Returns pointer to device if found, otherwise this is set to NULL
+ * @return 0 if OK, -ve on error
+ */
+int device_get_by_driver_info_idx(uint idx, struct udevice **devp);
+
+/**
  * device_find_first_child() - Find the first child of a device
  *
  * @parent: Parent device to search
@@ -742,7 +778,7 @@ int dev_enable_by_path(const char *path);
  */
 static inline bool device_is_on_pci_bus(const struct udevice *dev)
 {
-	return device_get_uclass_id(dev->parent) == UCLASS_PCI;
+	return dev->parent && device_get_uclass_id(dev->parent) == UCLASS_PCI;
 }
 
 /**
@@ -801,7 +837,7 @@ static inline bool device_is_on_pci_bus(const struct udevice *dev)
 	     _ret = device_next_child_err(&dev))
 
 /**
- * dm_scan_fdt_dev() - Bind child device in a the device tree
+ * dm_scan_fdt_dev() - Bind child device in the device tree
  *
  * This handles device which have sub-nodes in the device tree. It scans all
  * sub-nodes and binds drivers for each node where a driver can be found.

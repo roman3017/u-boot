@@ -18,7 +18,6 @@
 #define GICD_BASE	0xF9000000
 #define GICR_BASE	0xF9080000
 
-
 #define CONFIG_SYS_INIT_SP_ADDR		CONFIG_SYS_TEXT_BASE
 
 /* Generic Timer Definitions - setup in EL3. Setup by ATF for other cases */
@@ -54,7 +53,7 @@
 #define DFU_ALT_INFO_RAM \
 	"dfu_ram_info=" \
 	"setenv dfu_alt_info " \
-	"Image ram $kernel_addr_r $kernel_size_r\\\\;" \
+	"Image ram 80000 $kernel_size_r\\\\;" \
 	"system.dtb ram $fdt_addr_r $fdt_size_r\0" \
 	"dfu_ram=run dfu_ram_info && dfu 0 ram 0\0" \
 	"thor_ram=run dfu_ram_info && thordown 0 ram 0\0"
@@ -79,7 +78,6 @@
 #define CONFIG_CLOCKS
 
 #define ENV_MEM_LAYOUT_SETTINGS \
-	"fdt_high=10000000\0" \
 	"fdt_addr_r=0x40000000\0" \
 	"fdt_size_r=0x400000\0" \
 	"pxefile_addr_r=0x10000000\0" \
@@ -95,6 +93,18 @@
 # define BOOT_TARGET_DEVICES_MMC(func)
 #endif
 
+#if defined(CONFIG_CMD_PXE) && defined(CONFIG_CMD_DHCP)
+# define BOOT_TARGET_DEVICES_PXE(func)	func(PXE, pxe, na)
+#else
+# define BOOT_TARGET_DEVICES_PXE(func)
+#endif
+
+#if defined(CONFIG_CMD_DHCP)
+# define BOOT_TARGET_DEVICES_DHCP(func)	func(DHCP, dhcp, na)
+#else
+# define BOOT_TARGET_DEVICES_DHCP(func)
+#endif
+
 #if defined(CONFIG_ZYNQMP_GQSPI) || defined(CONFIG_CADENCE_OSPI_VERSAL)
 # define BOOT_TARGET_DEVICES_XSPI(func)	func(XSPI, xspi, 0)
 #else
@@ -108,7 +118,7 @@
 	"source ${scriptaddr}; echo XSPI: SCRIPT FAILED: continuing...;\0"
 
 #define BOOTENV_DEV_NAME_XSPI(devtypeu, devtypel, instance) \
-	"xspi "
+	"xspi0 "
 
 #define BOOT_TARGET_DEVICES_JTAG(func)	func(JTAG, jtag, na)
 
@@ -136,8 +146,8 @@
 	BOOT_TARGET_DEVICES_MMC(func) \
 	BOOT_TARGET_DEVICES_XSPI(func) \
 	BOOT_TARGET_DEVICES_DFU_USB(func) \
-	func(PXE, pxe, na) \
-	func(DHCP, dhcp, na)
+	BOOT_TARGET_DEVICES_PXE(func) \
+	BOOT_TARGET_DEVICES_DHCP(func)
 
 #include <config_distro_bootcmd.h>
 

@@ -220,7 +220,7 @@ static int decode_sromc(const void *blob, struct fdt_sromc *config)
 }
 #endif
 
-int board_eth_init(bd_t *bis)
+int board_eth_init(struct bd_info *bis)
 {
 #ifdef CONFIG_SMC911X
 	u32 smc_bw_conf, smc_bc_conf;
@@ -304,7 +304,6 @@ int board_late_init(void)
 	int mmcbootdev = get_boot_mmc_dev();
 	char mmcbootdev_str[16];
 
-	stdio_print_current_devices();
 	ret = uclass_first_device_err(UCLASS_CROS_EC, &dev);
 	if (ret && ret != -ENODEV) {
 		/* Force console on */

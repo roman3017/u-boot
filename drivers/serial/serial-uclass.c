@@ -170,9 +170,9 @@ int serial_init(void)
 }
 
 /* Called after relocation */
-void serial_initialize(void)
+int serial_initialize(void)
 {
-	serial_init();
+	return serial_init();
 }
 
 static void _serial_putc(struct udevice *dev, char ch)
@@ -413,7 +413,7 @@ static int on_baudrate(const char *name, const char *value, enum env_op op,
 
 		if ((flags & H_INTERACTIVE) != 0)
 			while (1) {
-				if (getc() == '\r')
+				if (getchar() == '\r')
 					break;
 			}
 

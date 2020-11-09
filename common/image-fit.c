@@ -32,6 +32,7 @@ DECLARE_GLOBAL_DATA_PTR;
 #include <u-boot/md5.h>
 #include <u-boot/sha1.h>
 #include <u-boot/sha256.h>
+#include <u-boot/sha512.h>
 
 /*****************************************************************************/
 /* New uImage format routines */
@@ -790,17 +791,18 @@ static int fit_image_get_address(const void *fit, int noffset, char *name,
 		return -1;
 	}
 
-	if (len > sizeof(ulong)) {
-		printf("Unsupported %s address size\n", name);
-		return -1;
-	}
-
 	cell_len = len >> 2;
 	/* Use load64 to avoid compiling warning for 32-bit target */
 	while (cell_len--) {
 		load64 = (load64 << 32) | uimage_to_cpu(*cell);
 		cell++;
 	}
+
+	if (len > sizeof(ulong) && (uint32_t)(load64 >> 32)) {
+		printf("Unsupported %s address size\n", name);
+		return -1;
+	}
+
 	*load = (ulong)load64;
 
 	return 0;
@@ -1206,6 +1208,14 @@ int calculate_hash(const void *data, int data_len, const char *algo,
 		sha256_csum_wd((unsigned char *)data, data_len,
 			       (unsigned char *)value, CHUNKSZ_SHA256);
 		*value_len = SHA256_SUM_LEN;
+	} else if (IMAGE_ENABLE_SHA384 && strcmp(algo, "sha384") == 0) {
+		sha384_csum_wd((unsigned char *)data, data_len,
+			       (unsigned char *)value, CHUNKSZ_SHA384);
+		*value_len = SHA384_SUM_LEN;
+	} else if (IMAGE_ENABLE_SHA512 && strcmp(algo, "sha512") == 0) {
+		sha512_csum_wd((unsigned char *)data, data_len,
+			       (unsigned char *)value, CHUNKSZ_SHA512);
+		*value_len = SHA512_SUM_LEN;
 	} else if (IMAGE_ENABLE_MD5 && strcmp(algo, "md5") == 0) {
 		md5_wd((unsigned char *)data, data_len, value, CHUNKSZ_MD5);
 		*value_len = 16;

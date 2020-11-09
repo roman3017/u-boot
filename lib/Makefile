@@ -37,6 +37,7 @@ obj-$(CONFIG_FIT) += fdtdec_common.o
 obj-$(CONFIG_TEST_FDTDEC) += fdtdec_test.o
 obj-$(CONFIG_GZIP_COMPRESSED) += gzip.o
 obj-$(CONFIG_GENERATE_SMBIOS_TABLE) += smbios.o
+obj-$(CONFIG_SMBIOS_PARSER) += smbios-parser.o
 obj-$(CONFIG_IMAGE_SPARSE) += image-sparse.o
 obj-y += ldiv.o
 obj-$(CONFIG_XXHASH) += xxhash.o
@@ -61,6 +62,7 @@ obj-$(CONFIG_$(SPL_)MD5) += md5.o
 obj-$(CONFIG_$(SPL_)RSA) += rsa/
 obj-$(CONFIG_SHA1) += sha1.o
 obj-$(CONFIG_SHA256) += sha256.o
+obj-$(CONFIG_SHA512_ALGO) += sha512.o
 
 obj-$(CONFIG_$(SPL_)ZLIB) += zlib/
 obj-$(CONFIG_$(SPL_)ZSTD) += zstd/
@@ -107,6 +109,7 @@ obj-y += string.o
 obj-y += tables_csum.o
 obj-y += time.o
 obj-y += hexdump.o
+obj-$(CONFIG_GETOPT) += getopt.o
 obj-$(CONFIG_TRACE) += trace.o
 obj-$(CONFIG_LIB_UUID) += uuid.o
 obj-$(CONFIG_LIB_RAND) += rand.o
@@ -124,6 +127,7 @@ else
 # Main U-Boot always uses the full printf support
 obj-y += vsprintf.o strto.o
 obj-$(CONFIG_OID_REGISTRY) += oid_registry.o
+obj-$(CONFIG_SSCANF) += sscanf.o
 endif
 
 obj-y += date.o

@@ -8,7 +8,10 @@ U-Boot API documentation
 
    dfu
    efi
+   getopt
    linker_lists
+   pinctrl
    rng
    serial
+   timer
    unicode

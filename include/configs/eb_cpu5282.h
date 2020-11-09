@@ -27,7 +27,6 @@
 
 #define CONFIG_BOOT_RETRY_TIME	-1
 #define CONFIG_RESET_TO_RETRY
-#define CONFIG_SPLASH_SCREEN
 
 #define CONFIG_HW_WATCHDOG
 
@@ -213,9 +212,6 @@
  * VIDEO configuration
  */
 
-#ifdef CONFIG_VIDEO
-#define CONFIG_VIDEO_VCXK			1
-
 #define CONFIG_SYS_VCXK_DEFAULT_LINEALIGN	2
 #define	CONFIG_SYS_VCXK_DOUBLEBUFFERED		1
 #define CONFIG_SYS_VCXK_BASE			CONFIG_SYS_CS2_BASE
@@ -236,6 +232,5 @@
 #define CONFIG_SYS_VCXK_INVERT_DDR		MCFGPIO_DDRE
 #define CONFIG_SYS_VCXK_INVERT_PIN		MCFGPIO_PORT2
 
-#endif /* CONFIG_VIDEO */
 #endif	/* _CONFIG_M5282EVB_H */
 /*---------------------------------------------------------------------*/

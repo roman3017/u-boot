@@ -48,13 +48,11 @@ struct omap_timer_priv {
 	struct omap_gptimer_regs *regs;
 };
 
-static int omap_timer_get_count(struct udevice *dev, u64 *count)
+static u64 omap_timer_get_count(struct udevice *dev)
 {
 	struct omap_timer_priv *priv = dev_get_priv(dev);
 
-	*count = timer_conv_64(readl(&priv->regs->tcrr));
-
-	return 0;
+	return timer_conv_64(readl(&priv->regs->tcrr));
 }
 
 static int omap_timer_probe(struct udevice *dev)
@@ -79,7 +77,7 @@ static int omap_timer_ofdata_to_platdata(struct udevice *dev)
 {
 	struct omap_timer_priv *priv = dev_get_priv(dev);
 
-	priv->regs = map_physmem(devfdt_get_addr(dev),
+	priv->regs = map_physmem(dev_read_addr(dev),
 				 sizeof(struct omap_gptimer_regs), MAP_NOCACHE);
 
 	return 0;

@@ -8,6 +8,7 @@ dtb-$(CONFIG_TARGET_VEXRISCV_SAXON) += saxon_nexys_a7.dtb
 dtb-$(CONFIG_TARGET_VEXRISCV_SAXON) += saxon_ulx3s.dtb
 dtb-$(CONFIG_TARGET_VEXRISCV_SAXON) += saxon_tang.dtb
 dtb-$(CONFIG_TARGET_VEXRISCV_SAXON) += saxon_bsp.dtb
+dtb-$(CONFIG_TARGET_SIPEED_MAIX) += k210-maix-bit.dtb
 
 targets += $(dtb-y)
 

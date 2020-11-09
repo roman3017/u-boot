@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0+
 /*
- * Copyright 2017-2019 NXP
+ * Copyright 2017-2020 NXP
  * Copyright 2014-2015 Freescale Semiconductor, Inc.
  */
 
@@ -1040,13 +1040,13 @@ int print_cpuinfo(void)
 #endif
 
 #ifdef CONFIG_FSL_ESDHC
-int cpu_mmc_init(bd_t *bis)
+int cpu_mmc_init(struct bd_info *bis)
 {
 	return fsl_esdhc_mmc_init(bis);
 }
 #endif
 
-int cpu_eth_init(bd_t *bis)
+int cpu_eth_init(struct bd_info *bis)
 {
 	int error = 0;
 
@@ -1147,15 +1147,15 @@ int arch_early_init_r(void)
 	 * EC*_PMUX(rgmii) bits in RCW.
 	 * e.g. dpmac 17 and 18 in LX2160A can be configured as SGMII from
 	 * serdes bits and as RGMII via EC1_PMUX/EC2_PMUX bits
-	 * Now if a dpmac is enabled by serdes bits then it takes precedence
-	 * over EC*_PMUX bits. i.e. in LX2160A if we select serdes protocol
-	 * that configures dpmac17 as SGMII and set the EC1_PMUX as RGMII,
-	 * then the dpmac is SGMII and not RGMII.
+	 * Now if a dpmac is enabled as RGMII through ECx_PMUX then it takes
+	 * precedence over SerDes protocol. i.e. in LX2160A if we select serdes
+	 * protocol that configures dpmac17 as SGMII and set the EC1_PMUX as
+	 * RGMII, then the dpmac is RGMII and not SGMII.
 	 *
-	 * Therefore, move the fsl_rgmii_init after fsl_serdes_init. in
-	 * fsl_rgmii_init function of SOC, we will check if the dpmac is enabled
-	 * or not? if it is (fsl_serdes_init has already enabled the dpmac),
-	 * then don't enable it.
+	 * Therefore, even thought fsl_rgmii_init is after fsl_serdes_init
+	 * function of SOC, the dpmac will be enabled as RGMII even if it was
+	 * also enabled before as SGMII. If ECx_PMUX is not configured for
+	 * RGMII, DPMAC will remain configured as SGMII from fsl_serdes_init().
 	 */
 	fsl_rgmii_init();
 #endif
@@ -1229,13 +1229,15 @@ __efi_runtime_data u32 __iomem *rstcr = (u32 *)CONFIG_SYS_FSL_RST_ADDR;
 
 void __efi_runtime reset_cpu(ulong addr)
 {
+#ifdef CONFIG_ARCH_LX2160A
+	/* clear the RST_REQ_MSK and SW_RST_REQ */
+	out_le32(rstcr, 0x0);
+
+	/* initiate the sw reset request */
+	out_le32(rstcr, 0x1);
+#else
 	u32 val;
 
-#ifdef CONFIG_ARCH_LX2160A
-	val = in_le32(rstcr);
-	val |= 0x01;
-	out_le32(rstcr, val);
-#else
 	/* Raise RESET_REQ_B */
 	val = scfg_in32(rstcr);
 	val |= 0x02;

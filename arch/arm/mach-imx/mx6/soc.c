@@ -22,8 +22,12 @@
 #include <asm/arch/mxc_hdmi.h>
 #include <asm/arch/crm_regs.h>
 #include <dm.h>
+#include <fsl_sec.h>
 #include <imx_thermal.h>
 #include <mmc.h>
+
+#define has_err007805() \
+	(is_mx6sl() || is_mx6dl() || is_mx6solo() || is_mx6ull())
 
 struct scu_regs {
 	u32	ctrl;
@@ -33,7 +37,7 @@ struct scu_regs {
 	u32	fpga_rev;
 };
 
-#if defined(CONFIG_IMX_THERMAL)
+#if !defined(CONFIG_SPL_BUILD) && defined(CONFIG_IMX_THERMAL)
 static const struct imx_thermal_plat imx6_thermal_plat = {
 	.regs = (void *)ANATOP_BASE_ADDR,
 	.fuse_bank = 1,
@@ -468,7 +472,7 @@ int arch_cpu_init(void)
 	}
 
 	/* Set perclk to source from OSC 24MHz */
-	if (is_mx6sl())
+	if (has_err007805())
 		setbits_le32(&ccm->cscmr1, MXC_CCM_CSCMR1_PER_CLK_SEL_MASK);
 
 	imx_wdog_disable_powerdown(); /* Disable PDE bit of WMCR register */
@@ -691,6 +695,15 @@ void imx_setup_hdmi(void)
 }
 #endif
 
+#ifdef CONFIG_ARCH_MISC_INIT
+int arch_misc_init(void)
+{
+#ifdef CONFIG_FSL_CAAM
+	sec_init();
+#endif
+	return 0;
+}
+#endif
 
 /*
  * gpr_init() function is common for boards using MX6S, MX6DL, MX6D,

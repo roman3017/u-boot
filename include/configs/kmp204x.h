@@ -64,9 +64,6 @@ unsigned long get_board_sys_clk(unsigned long dummy);
 
 #define CONFIG_ENABLE_36BIT_PHYS
 
-#define CONFIG_ADDR_MAP
-#define CONFIG_SYS_NUM_ADDR_MAP		64	/* number of TLB1 entries */
-
 #define CONFIG_POST CONFIG_SYS_POST_MEM_REGIONS	/* POST memory regions test */
 
 /*
@@ -127,10 +124,6 @@ unsigned long get_board_sys_clk(unsigned long dummy);
  * is not valid yet, which is the case for when u-boot copies itself to RAM
  */
 #define CONFIG_PRAM		((CONFIG_KM_PNVRAM + CONFIG_KM_PHRAM) >> 10)
-
-#define CONFIG_KM_CRAMFS_ADDR	0x2000000
-#define CONFIG_KM_KERNEL_ADDR	0x1000000	/* max kernel size 15.5Mbytes */
-#define CONFIG_KM_FDT_ADDR	0x1F80000	/* max dtb    size  0.5Mbytes */
 
 /*
  * Local Bus Definitions
@@ -365,7 +358,6 @@ int get_scl(void);
 /*
  * Environment Configuration
  */
-#define CONFIG_ENV_OVERWRITE
 #ifndef CONFIG_KM_DEF_ENV		/* if not set by keymile-common.h */
 #define CONFIG_KM_DEF_ENV "km-common=empty\0"
 #endif

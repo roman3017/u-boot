@@ -58,7 +58,7 @@ class Entry_u_boot_ucode(Entry_blob):
             contents of this entry.
     """
     def __init__(self, section, etype, node):
-        Entry_blob.__init__(self, section, etype, node)
+        super().__init__(section, etype, node)
 
     def ObtainContents(self):
         # If the section does not need microcode, there is nothing to do
@@ -81,6 +81,7 @@ class Entry_u_boot_ucode(Entry_blob):
             if fdt_entry:
                 break
         if not fdt_entry:
+            self.data = b''
             return True
         if not fdt_entry.ready:
             return False

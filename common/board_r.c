@@ -46,9 +46,11 @@
 #include <miiphy.h>
 #endif
 #include <mmc.h>
+#include <mux.h>
 #include <nand.h>
 #include <of_live.h>
 #include <onenand_uboot.h>
+#include <pvblock.h>
 #include <scsi.h>
 #include <serial.h>
 #include <status_led.h>
@@ -56,6 +58,9 @@
 #include <timer.h>
 #include <trace.h>
 #include <watchdog.h>
+#ifdef CONFIG_XEN
+#include <xen.h>
+#endif
 #ifdef CONFIG_ADDR_MAP
 #include <asm/mmu.h>
 #endif
@@ -67,6 +72,9 @@
 #include <wdt.h>
 #if defined(CONFIG_GPIO_HOG)
 #include <asm/gpio.h>
+#endif
+#ifdef CONFIG_EFI_SETUP_EARLY
+#include <efi_loader.h>
 #endif
 
 DECLARE_GLOBAL_DATA_PTR;
@@ -187,12 +195,6 @@ static int initr_reloc_global_data(void)
 	return 0;
 }
 
-static int initr_serial(void)
-{
-	serial_initialize();
-	return 0;
-}
-
 #if defined(CONFIG_PPC) || defined(CONFIG_M68K) || defined(CONFIG_MIPS)
 static int initr_trap(void)
 {
@@ -229,6 +231,15 @@ static int initr_post_backlog(void)
 static int initr_unlock_ram_in_cache(void)
 {
 	unlock_ram_in_cache();	/* it's time to unlock D-cache in e500 */
+	return 0;
+}
+#endif
+
+#ifdef CONFIG_PCI_ENDPOINT
+static int initr_pci_ep(void)
+{
+	pci_ep_init();
+
 	return 0;
 }
 #endif
@@ -288,20 +299,21 @@ static int initr_noncached(void)
 }
 #endif
 
-#ifdef CONFIG_OF_LIVE
 static int initr_of_live(void)
 {
-	int ret;
+	if (CONFIG_IS_ENABLED(OF_LIVE)) {
+		int ret;
 
-	bootstage_start(BOOTSTAGE_ID_ACCUM_OF_LIVE, "of_live");
-	ret = of_live_build(gd->fdt_blob, (struct device_node **)&gd->of_root);
-	bootstage_accum(BOOTSTAGE_ID_ACCUM_OF_LIVE);
-	if (ret)
-		return ret;
+		bootstage_start(BOOTSTAGE_ID_ACCUM_OF_LIVE, "of_live");
+		ret = of_live_build(gd->fdt_blob,
+				    (struct device_node **)gd_of_root_ptr());
+		bootstage_accum(BOOTSTAGE_ID_ACCUM_OF_LIVE);
+		if (ret)
+			return ret;
+	}
 
 	return 0;
 }
-#endif
 
 #ifdef CONFIG_DM
 static int initr_dm(void)
@@ -330,6 +342,17 @@ static int initr_dm_devices(void)
 
 	if (IS_ENABLED(CONFIG_TIMER_EARLY)) {
 		ret = dm_timer_init();
+		if (ret)
+			return ret;
+	}
+
+	if (IS_ENABLED(CONFIG_MULTIPLEXER)) {
+		/*
+		 * Initialize the multiplexer controls to their default state.
+		 * This must be done early as other drivers may unknowingly
+		 * rely on it.
+		 */
+		ret = dm_mux_init();
 		if (ret)
 			return ret;
 	}
@@ -381,7 +404,7 @@ __weak int is_flash_available(void)
 static int initr_flash(void)
 {
 	ulong flash_size = 0;
-	bd_t *bd = gd->bd;
+	struct bd_info *bd = gd->bd;
 
 	if (!is_flash_available())
 		return 0;
@@ -462,6 +485,23 @@ static int initr_mmc(void)
 }
 #endif
 
+#ifdef CONFIG_XEN
+static int initr_xen(void)
+{
+	xen_init();
+	return 0;
+}
+#endif
+
+#ifdef CONFIG_PVBLOCK
+static int initr_pvblock(void)
+{
+	puts("PVBLOCK: ");
+	pvblock_init();
+	return 0;
+}
+#endif
+
 /*
  * Tell if it's OK to load the environment early in boot.
  *
@@ -533,25 +573,11 @@ static int initr_api(void)
 #ifdef CONFIG_CMD_NET
 static int initr_ethaddr(void)
 {
-	bd_t *bd = gd->bd;
+	struct bd_info *bd = gd->bd;
 
 	/* kept around for legacy kernels only ... ignore the next section */
 	eth_env_get_enetaddr("ethaddr", bd->bi_enetaddr);
-#ifdef CONFIG_HAS_ETH1
-	eth_env_get_enetaddr("eth1addr", bd->bi_enet1addr);
-#endif
-#ifdef CONFIG_HAS_ETH2
-	eth_env_get_enetaddr("eth2addr", bd->bi_enet2addr);
-#endif
-#ifdef CONFIG_HAS_ETH3
-	eth_env_get_enetaddr("eth3addr", bd->bi_enet3addr);
-#endif
-#ifdef CONFIG_HAS_ETH4
-	eth_env_get_enetaddr("eth4addr", bd->bi_enet4addr);
-#endif
-#ifdef CONFIG_HAS_ETH5
-	eth_env_get_enetaddr("eth5addr", bd->bi_enet5addr);
-#endif
+
 	return 0;
 }
 #endif /* CONFIG_CMD_NET */
@@ -691,9 +717,7 @@ static init_fnc_t init_sequence_r[] = {
 #ifdef CONFIG_SYS_NONCACHED_MEMORY
 	initr_noncached,
 #endif
-#ifdef CONFIG_OF_LIVE
 	initr_of_live,
-#endif
 #ifdef CONFIG_DM
 	initr_dm,
 #endif
@@ -719,12 +743,15 @@ static init_fnc_t init_sequence_r[] = {
 #endif
 	initr_dm_devices,
 	stdio_init_tables,
-	initr_serial,
+	serial_initialize,
 	initr_announce,
 #if CONFIG_IS_ENABLED(WDT)
 	initr_watchdog,
 #endif
 	INIT_FUNC_WATCHDOG_RESET
+#if defined(CONFIG_NEEDS_MANUAL_RELOC) && defined(CONFIG_BLOCK_CACHE)
+	blkcache_init,
+#endif
 #ifdef CONFIG_NEEDS_MANUAL_RELOC
 	initr_manual_reloc_cmdtable,
 #endif
@@ -769,6 +796,12 @@ static init_fnc_t init_sequence_r[] = {
 #endif
 #ifdef CONFIG_MMC
 	initr_mmc,
+#endif
+#ifdef CONFIG_XEN
+	initr_xen,
+#endif
+#ifdef CONFIG_PVBLOCK
+	initr_pvblock,
 #endif
 	initr_env,
 #ifdef CONFIG_SYS_BOOTPARAMS_LEN
@@ -830,6 +863,9 @@ static init_fnc_t init_sequence_r[] = {
 #ifdef CONFIG_BITBANGMII
 	initr_bbmii,
 #endif
+#ifdef CONFIG_PCI_ENDPOINT
+	initr_pci_ep,
+#endif
 #ifdef CONFIG_CMD_NET
 	INIT_FUNC_WATCHDOG_RESET
 	initr_net,
@@ -856,8 +892,8 @@ static init_fnc_t init_sequence_r[] = {
 #if defined(CONFIG_PRAM)
 	initr_mem,
 #endif
-#if defined(CONFIG_M68K) && defined(CONFIG_BLOCK_CACHE)
-	blkcache_init,
+#ifdef CONFIG_EFI_SETUP_EARLY
+	(init_fnc_t)efi_init_obj_list,
 #endif
 	run_main_loop,
 };

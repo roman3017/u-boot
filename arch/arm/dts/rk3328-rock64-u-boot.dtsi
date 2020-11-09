@@ -9,6 +9,27 @@
 	chosen {
 		u-boot,spl-boot-order = "same-as-spl", &sdmmc, &emmc;
 	};
+
+	smbios {
+		compatible = "u-boot,sysinfo-smbios";
+
+		smbios {
+			system {
+				manufacturer = "pine64";
+				product = "rock64_rk3328";
+			};
+
+			baseboard {
+				manufacturer = "pine64";
+				product = "rock64_rk3328";
+			};
+
+			chassis {
+				manufacturer = "pine64";
+				product = "rock64_rk3328";
+			};
+		};
+	};
 };
 
 &gpio0 {
@@ -45,4 +66,10 @@
 /* Need this and all the pinctrl/gpio stuff above to set pinmux */
 &vcc_sd {
 	u-boot,dm-spl;
+};
+
+&spi0 {
+	spi_flash: spiflash@0 {
+		u-boot,dm-pre-reloc;
+	};
 };

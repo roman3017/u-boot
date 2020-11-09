@@ -8,9 +8,9 @@
 
 #include <common.h>
 #include <dm.h>
+#include <fdtdec.h>
 #include <init.h>
 #include <ram.h>
-#include <regmap.h>
 #include <syscon.h>
 #include <asm/io.h>
 #include <clk.h>
@@ -39,9 +39,6 @@
 #define DENALI_PHY_1152	1152
 #define DENALI_PHY_1214	1214
 
-#define PAYLOAD_DEST	0x80000000
-#define DDR_MEM_SIZE	(8UL * 1024UL * 1024UL * 1024UL)
-
 #define DRAM_CLASS_OFFSET			8
 #define DRAM_CLASS_DDR4				0xA
 #define OPTIMAL_RMODW_EN_OFFSET			0
@@ -64,6 +61,8 @@
 
 #define PHY_RX_CAL_DQ0_0_OFFSET			0
 #define PHY_RX_CAL_DQ1_0_OFFSET			16
+
+DECLARE_GLOBAL_DATA_PTR;
 
 struct fu540_ddrctl {
 	volatile u32 denali_ctl[265];
@@ -235,8 +234,8 @@ static int fu540_ddr_setup(struct udevice *dev)
 	struct fu540_ddr_params *params = &plat->ddr_params;
 	volatile u32 *denali_ctl =  priv->ctl->denali_ctl;
 	volatile u32 *denali_phy =  priv->phy->denali_phy;
-	const u64 ddr_size = DDR_MEM_SIZE;
-	const u64 ddr_end = PAYLOAD_DEST + ddr_size;
+	const u64 ddr_size = priv->info.size;
+	const u64 ddr_end = priv->info.base + ddr_size;
 	int ret, i;
 	u32 physet;
 
@@ -302,7 +301,7 @@ static int fu540_ddr_setup(struct udevice *dev)
 		     | (1 << MULTIPLE_OUT_OF_RANGE_OFFSET));
 
 	/* set up range protection */
-	fu540_ddr_setup_range_protection(denali_ctl, DDR_MEM_SIZE);
+	fu540_ddr_setup_range_protection(denali_ctl, priv->info.size);
 
 	/* Mask off port command error interrupt DENALI_CTL_136 */
 	setbits_le32(DENALI_CTL_136 + denali_ctl,
@@ -314,14 +313,14 @@ static int fu540_ddr_setup(struct udevice *dev)
 
 	/* check size */
 	priv->info.size = get_ram_size((long *)priv->info.base,
-				       DDR_MEM_SIZE);
+				       ddr_size);
 
-	debug("%s : %lx\n", __func__, priv->info.size);
+	debug("%s : %lx\n", __func__, (uintptr_t)priv->info.size);
 
 	/* check memory access for all memory */
-	if (priv->info.size != DDR_MEM_SIZE) {
+	if (priv->info.size != ddr_size) {
 		printf("DDR invalid size : 0x%lx, expected 0x%lx\n",
-		       priv->info.size, DDR_MEM_SIZE);
+		       (uintptr_t)priv->info.size, (uintptr_t)ddr_size);
 		return -EINVAL;
 	}
 
@@ -333,17 +332,17 @@ static int fu540_ddr_probe(struct udevice *dev)
 {
 	struct fu540_ddr_info *priv = dev_get_priv(dev);
 
+	/* Read memory base and size from DT */
+	fdtdec_setup_mem_size_base();
+	priv->info.base = gd->ram_base;
+	priv->info.size = gd->ram_size;
+
 #if defined(CONFIG_SPL_BUILD)
-	struct regmap *map;
 	int ret;
 	u32 clock = 0;
 
 	debug("FU540 DDR probe\n");
 	priv->dev = dev;
-
-	ret = regmap_init_mem(dev_ofnode(dev), &map);
-	if (ret)
-		return ret;
 
 	ret = clk_get_by_index(dev, 0, &priv->ddr_clk);
 	if (ret) {
@@ -364,18 +363,18 @@ static int fu540_ddr_probe(struct udevice *dev)
 	}
 
 	ret = clk_enable(&priv->ddr_clk);
-	priv->ctl = regmap_get_range(map, 0);
-	priv->phy = regmap_get_range(map, 1);
-	priv->physical_filter_ctrl = regmap_get_range(map, 2);
+	if (ret < 0) {
+		debug("Could not enable DDR clock\n");
+		return ret;
+	}
 
-	priv->info.base = CONFIG_SYS_SDRAM_BASE;
+	priv->ctl = (struct fu540_ddrctl *)dev_read_addr_index(dev, 0);
+	priv->phy = (struct fu540_ddrphy *)dev_read_addr_index(dev, 1);
+	priv->physical_filter_ctrl = (u32 *)dev_read_addr_index(dev, 2);
 
-	priv->info.size = 0;
 	return fu540_ddr_setup(dev);
-#else
-	priv->info.base = CONFIG_SYS_SDRAM_BASE;
-	priv->info.size = DDR_MEM_SIZE;
 #endif
+
 	return 0;
 }
 

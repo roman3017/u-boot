@@ -131,7 +131,7 @@ static int console_setfile(int file, struct stdio_dev * dev)
 		 */
 		switch (file) {
 		case stdin:
-			gd->jt->getc = getc;
+			gd->jt->getc = getchar;
 			gd->jt->tstc = tstc;
 			break;
 		case stdout:
@@ -179,7 +179,7 @@ struct stdio_dev **console_devices[MAX_FILES];
 int cd_count[MAX_FILES];
 
 /*
- * This depends on tstc() always being called before getc().
+ * This depends on tstc() always being called before getchar().
  * This is guaranteed to be true because this routine is called
  * only from fgetc() which assures it.
  * No attempt is made to demultiplex multiple input sources.
@@ -229,16 +229,32 @@ static void console_putc(int file, const char c)
 	}
 }
 
-static void console_puts_noserial(int file, const char *s)
+/**
+ * console_puts_select() - Output a string to all console devices
+ *
+ * @file: File number to output to (e,g, stdout, see stdio.h)
+ * @serial_only: true to output only to serial, false to output to everything
+ *	else
+ * @s: String to output
+ */
+static void console_puts_select(int file, bool serial_only, const char *s)
 {
 	int i;
 	struct stdio_dev *dev;
 
 	for (i = 0; i < cd_count[file]; i++) {
+		bool is_serial;
+
 		dev = console_devices[file][i];
-		if (dev->puts != NULL && !console_dev_is_serial(dev))
+		is_serial = console_dev_is_serial(dev);
+		if (dev->puts && serial_only == is_serial)
 			dev->puts(dev, s);
 	}
+}
+
+void console_puts_select_stderr(bool serial_only, const char *s)
+{
+	console_puts_select(stderr, serial_only, s);
 }
 
 static void console_puts(int file, const char *s)
@@ -275,9 +291,9 @@ static inline void console_putc(int file, const char c)
 	stdio_devices[file]->putc(stdio_devices[file], c);
 }
 
-static inline void console_puts_noserial(int file, const char *s)
+void console_puts_select(int file, bool serial_only, const char *s)
 {
-	if (!console_dev_is_serial(stdio_devices[file]))
+	if (serial_only == console_dev_is_serial(stdio_devices[file]))
 		stdio_devices[file]->puts(stdio_devices[file], s);
 }
 
@@ -388,7 +404,7 @@ int fprintf(int file, const char *fmt, ...)
 
 /** U-Boot INITIAL CONSOLE-COMPATIBLE FUNCTION *****************************/
 
-int getc(void)
+int getchar(void)
 {
 #ifdef CONFIG_DISABLE_CONSOLE
 	if (gd->flags & GD_FLG_DISABLE_CONSOLE)
@@ -489,7 +505,7 @@ static void print_pre_console_buffer(int flushpoint)
 		puts(buf_out);
 		break;
 	case PRE_CONSOLE_FLUSHPOINT2_EVERYTHING_BUT_SERIAL:
-		console_puts_noserial(stdout, buf_out);
+		console_puts_select(stdout, false, buf_out);
 		break;
 	}
 }
@@ -619,10 +635,12 @@ void console_record_reset(void)
 	membuff_purge((struct membuff *)&gd->console_in);
 }
 
-void console_record_reset_enable(void)
+int console_record_reset_enable(void)
 {
 	console_record_reset();
 	gd->flags |= GD_FLG_RECORD;
+
+	return 0;
 }
 
 int console_record_readline(char *str, int maxlen)
@@ -645,7 +663,7 @@ int ctrlc(void)
 {
 	if (!ctrlc_disabled && gd->have_console) {
 		if (tstc()) {
-			switch (getc()) {
+			switch (getchar()) {
 			case 0x03:		/* ^C - Control C */
 				ctrlc_was_pressed = 1;
 				return 1;
@@ -667,10 +685,10 @@ int confirm_yesno(void)
 
 	/* Flush input */
 	while (tstc())
-		getc();
+		getchar();
 	i = 0;
 	while (i < sizeof(str_input)) {
-		str_input[i] = getc();
+		str_input[i] = getchar();
 		putc(str_input[i]);
 		if (str_input[i] == '\r')
 			break;
@@ -713,7 +731,7 @@ struct stdio_dev *search_device(int flags, const char *name)
 
 	dev = stdio_get_by_name(name);
 #ifdef CONFIG_VIDCONSOLE_AS_LCD
-	if (!dev && !strcmp(name, "lcd"))
+	if (!dev && !strcmp(name, CONFIG_VIDCONSOLE_AS_NAME))
 		dev = stdio_get_by_name("vidconsole");
 #endif
 
@@ -776,7 +794,7 @@ int console_announce_r(void)
 
 	display_options_get_banner(false, buf, sizeof(buf));
 
-	console_puts_noserial(stdout, buf);
+	console_puts_select(stdout, false, buf);
 #endif
 
 	return 0;
@@ -897,8 +915,9 @@ done:
 	stdio_print_current_devices();
 #endif /* CONFIG_SYS_CONSOLE_INFO_QUIET */
 #ifdef CONFIG_VIDCONSOLE_AS_LCD
-	if (strstr(stdoutname, "lcd"))
-		printf("Warning: Please change 'lcd' to 'vidconsole' in stdout/stderr environment vars\n");
+	if (strstr(stdoutname, CONFIG_VIDCONSOLE_AS_NAME))
+		printf("Warning: Please change '%s' to 'vidconsole' in stdout/stderr environment vars\n",
+		       CONFIG_VIDCONSOLE_AS_NAME);
 #endif
 
 #ifdef CONFIG_SYS_CONSOLE_ENV_OVERWRITE
