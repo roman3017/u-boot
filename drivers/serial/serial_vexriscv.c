@@ -49,7 +49,7 @@ static void set_div(struct vexriscv_uart_regs *regs, int freq, int baudrate)
 {
   int div;
 
-	div = (freq + baudrate - 1) / baudrate;
+  div = (freq / (8*baudrate))-1;
   writel(div, &regs->div);
 }
 
