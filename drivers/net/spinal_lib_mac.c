@@ -70,11 +70,11 @@ static u32 spinal_lib_mac_rx_u32(void __iomem *base){
 }
 
 static void spinal_lib_mac_reset_set(void __iomem *base){
-    writel(SPINAL_LIB_MAC_CTRL_TX_RESET | SPINAL_LIB_MAC_CTRL_RX_RESET | SPINAL_LIB_MAC_CTRL_TX_ALIGN | SPINAL_LIB_MAC_CTRL_RX_ALIGN, base + SPINAL_LIB_MAC_CTRL);
+    writel(SPINAL_LIB_MAC_CTRL_TX_RESET | SPINAL_LIB_MAC_CTRL_RX_RESET , base + SPINAL_LIB_MAC_CTRL);
 }
 
 static void spinal_lib_mac_reset_clear(void __iomem *base){
-    writel(SPINAL_LIB_MAC_CTRL_TX_ALIGN | SPINAL_LIB_MAC_CTRL_RX_ALIGN, base + SPINAL_LIB_MAC_CTRL);
+    writel(0, base + SPINAL_LIB_MAC_CTRL);
 }
 
 static int spinal_lib_mac_start(struct udevice *dev)
@@ -86,13 +86,13 @@ static int spinal_lib_mac_send(struct udevice *dev, void *packet, int length)
 {
 	struct eth_pdata *pdata = dev_get_platdata(dev);
     void __iomem *base = (void *)pdata->iobase;
-    u32 bits = length*8+16;
+    u32 bits = length*8;
     u32 word_count = (bits+31)/32;
     u32 *ptr;
 
     while(!spinal_lib_mac_tx_ready(base));
     spinal_lib_mac_tx_u32(base, bits);
-    ptr = (u32*)((u32)packet-2);
+    ptr = (u32*)((u32)packet);
 
     while(word_count){
         u32 tockens = spinal_lib_mac_tx_availability(base);
@@ -115,7 +115,7 @@ static int spinal_lib_mac_recv(struct udevice *dev, int flags, uchar **packetp)
     if (!spinal_lib_mac_rx_pending(base)) return 0;
 
     u32 bits = spinal_lib_mac_rx_u32(base);
-    u32 len = (bits-16)/8;
+    u32 len = (bits)/8;
     u32 word_count = (bits+31)/32;
     u32 *ptr;
 
@@ -126,7 +126,7 @@ static int spinal_lib_mac_recv(struct udevice *dev, int flags, uchar **packetp)
     }
 
     *packetp = (uchar *)priv->buf;
-    ptr = (u32*)((u32)(*packetp)-2);
+    ptr = (u32*)((u32)(*packetp));
     while(word_count--){
         *ptr++ = spinal_lib_mac_rx_u32(base);
     }
