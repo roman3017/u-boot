@@ -11,6 +11,9 @@
 
 #define CONFIG_SYS_BOOTM_LEN (64 << 20)
 
+#define CONFIG_USB_OHCI_NEW
+#define CONFIG_SYS_USB_OHCI_MAX_ROOT_PORTS	1
+
 /* assuming Text Base is not bottom of memory for INIT_SP to work */
 #define CONFIG_SYS_LOAD_ADDR CONFIG_SYS_TEXT_BASE
 #define CONFIG_SYS_INIT_SP_ADDR CONFIG_SYS_LOAD_ADDR
