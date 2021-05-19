@@ -11,8 +11,10 @@
 
 #define CONFIG_SYS_BOOTM_LEN (64 << 20)
 
+#ifdef CONFIG_USB_OHCI_GENERIC
 #define CONFIG_USB_OHCI_NEW
 #define CONFIG_SYS_USB_OHCI_MAX_ROOT_PORTS	1
+#endif
 
 /* assuming Text Base is not bottom of memory for INIT_SP to work */
 #define CONFIG_SYS_LOAD_ADDR CONFIG_SYS_TEXT_BASE
