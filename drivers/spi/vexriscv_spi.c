@@ -110,8 +110,8 @@ static int vexriscv_spi_claim_bus(struct udevice *dev)
 	struct spi_slave *priv = dev_get_parent_priv(dev);
 	struct dm_spi_slave_platdata *slave = dev_get_parent_platdata(priv->dev);
 	debug("!!!%s:%d %d %d\n",__func__,__LINE__,plat->cs,slave->cs);
-	if (plat->cs != -1)
-		return -EINVAL;
+//	if (plat->cs != -1)
+//		return -EINVAL;
 	plat->cs = slave->cs;
 	return 0;
 }
